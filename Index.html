@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analyst Portfolio Manager - Core Tools Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b',
+                        darkborder: '#334155',
+                        // Tool specific brand colors
+                        powerbi: {
+                            DEFAULT: '#f2c811',
+                            bg: 'rgba(242, 200, 17, 0.12)',
+                            border: 'rgba(242, 200, 17, 0.3)',
+                            text: '#facc15'
+                        },
+                        excel: {
+                            DEFAULT: '#107c41',
+                            bg: 'rgba(16, 124, 65, 0.15)',
+                            border: 'rgba(16, 124, 65, 0.35)',
+                            text: '#34d399'
+                        },
+                        sql: {
+                            DEFAULT: '#00758f',
+                            bg: 'rgba(0, 117, 143, 0.18)',
+                            border: 'rgba(56, 189, 248, 0.35)',
+                            text: '#38bdf8'
+                        },
+                        tableau: {
+                            DEFAULT: '#e97627',
+                            bg: 'rgba(233, 118, 39, 0.15)',
+                            border: 'rgba(233, 118, 39, 0.35)',
+                            text: '#fb923c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200" id="appBody">
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-blue-600 to-emerald-500 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-layer-group text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg leading-tight tracking-wide bg-gradient-to-r from-blue-400 via-emerald-400 to-amber-300 bg-clip-text text-transparent">DataCraft Core Hub</h1>
+                    <p class="text-xs text-slate-400">Power BI • Excel • SQL • Tableau Showcase</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- Recruiter Mode Toggle -->
+                <button id="togglePublicModeBtn" onclick="togglePublicMode()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                    <i class="fa-solid fa-eye text-blue-400"></i>
+                    <span id="publicModeText">Recruiter View Mode</span>
+                </button>
+
+                <!-- Light/Dark Mode Switcher -->
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-sun text-amber-400 hidden dark:inline"></i>
+                    <i class="fa-solid fa-moon text-indigo-400 inline dark:hidden"></i>
+                </button>
+
+                <!-- Data Backup / Restore -->
+                <div class="relative group">
+                    <button class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                        <i class="fa-solid fa-database text-emerald-400"></i>
+                        <span>Data</span>
+                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div class="absolute right-0 mt-1 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 p-1.5">
+                        <button onclick="exportJSON()" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-700 rounded-lg flex items-center gap-2">
+                            <i class="fa-solid fa-download text-blue-400"></i> Export JSON
+                        </button>
+                        <label class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-700 rounded-lg flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-upload text-emerald-400"></i> Import JSON
+                            <input type="file" id="importFileInput" onchange="importJSON(event)" class="hidden" accept=".json">
+                        </label>
+                        <button onclick="resetToSampleData()" class="w-full text-left px-3 py-2 text-xs text-rose-400 hover:bg-slate-700 rounded-lg flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Reset Defaults (12 Projects)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Project Button -->
+                <button id="mainAddBtn" onclick="openProjectModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-blue-600/30 transition">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Project</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- 1. PROFILE HEADER -->
+        <section class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-between gap-6 relative z-10 items-start md:items-center">
+                <div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+                    <div class="relative group">
+                        <img id="profileAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Profile" class="w-20 h-20 rounded-2xl object-cover border-2 border-blue-500/50 shadow-md">
+                        <button id="editProfileBtn" onclick="openProfileModal()" class="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg text-xs shadow transition" title="Edit Profile">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-3">
+                            <h2 id="profileName" class="text-2xl font-extrabold text-white tracking-wide">Alex Morgan</h2>
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Data Analytics Specialist</span>
+                        </div>
+                        <p id="profileRole" class="text-blue-400 font-medium text-sm">BI & Analytics Engineer | Power BI • Excel • SQL • Tableau</p>
+                        <p id="profileBio" class="text-slate-400 text-xs sm:text-sm max-w-2xl line-clamp-2">Specialized in transforming raw transactional databases into decision-ready executive dashboards, automated financial models, and actionable SQL cohort analyses.</p>
+                        
+                        <div class="flex items-center gap-4 pt-1 text-xs text-slate-400">
+                            <a id="profileGithub" href="https://github.com" target="_blank" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-brands fa-github text-sm"></i> GitHub</a>
+                            <a id="profileLinkedin" href="https://linkedin.com" target="_blank" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-brands fa-linkedin text-sm"></i> LinkedIn</a>
+                            <a id="profileEmail" href="mailto:alex@example.com" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-solid fa-envelope text-sm"></i> Email</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Tool Counters -->
+                <div class="grid grid-cols-4 gap-2 bg-slate-900/80 p-3 rounded-2xl border border-slate-700/60 w-full md:w-auto">
+                    <div class="text-center px-2 py-1">
+                        <p class="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">Power BI</p>
+                        <p id="countPowerBI" class="text-xl font-extrabold text-white mt-0.5">3</p>
+                    </div>
+                    <div class="text-center px-2 py-1 border-l border-slate-800">
+                        <p class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Excel</p>
+                        <p id="countExcel" class="text-xl font-extrabold text-white mt-0.5">3</p>
+                    </div>
+                    <div class="text-center px-2 py-1 border-l border-slate-800">
+                        <p class="text-[10px] text-sky-400 uppercase font-bold tracking-wider">SQL</p>
+                        <p id="countSQL" class="text-xl font-extrabold text-white mt-0.5">3</p>
+                    </div>
+                    <div class="text-center px-2 py-1 border-l border-slate-800">
+                        <p class="text-[10px] text-orange-400 uppercase font-bold tracking-wider">Tableau</p>
+                        <p id="countTableau" class="text-xl font-extrabold text-white mt-0.5">3</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. CORE TOOL TABS & CONTROLS -->
+        <section class="space-y-4">
+            <!-- Tool Tabs Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-slate-800/90 border border-slate-700/70 rounded-2xl shadow-md">
+                <button onclick="switchToolTab('ALL')" id="tab-ALL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition bg-blue-600 text-white shadow">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>All Tools</span>
+                    <span id="badge-ALL" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900/40 text-white">12</span>
+                </button>
+                <button onclick="switchToolTab('Power BI')" id="tab-PowerBI" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
+                    <i class="fa-solid fa-chart-column text-yellow-400"></i>
+                    <span>Power BI</span>
+                    <span id="badge-PowerBI" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-yellow-400 border border-yellow-500/30">3</span>
+                </button>
+                <button onclick="switchToolTab('Excel')" id="tab-Excel" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                    <span>Excel</span>
+                    <span id="badge-Excel" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-emerald-400 border border-emerald-500/30">3</span>
+                </button>
+                <button onclick="switchToolTab('SQL')" id="tab-SQL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
+                    <i class="fa-solid fa-database text-sky-400"></i>
+                    <span>SQL</span>
+                    <span id="badge-SQL" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-sky-400 border border-sky-500/30">3</span>
+                </button>
+                <button onclick="switchToolTab('Tableau')" id="tab-Tableau" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50 col-span-2 sm:col-span-1">
+                    <i class="fa-solid fa-chart-area text-orange-400"></i>
+                    <span>Tableau</span>
+                    <span id="badge-Tableau" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-orange-400 border border-orange-500/30">3</span>
+                </button>
+            </div>
+
+            <!-- Search, Domain Filter & Grid Toggle -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search title, domain, method, or keyword..." 
+                           class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <!-- Domain Filter -->
+                    <select id="domainFilter" onchange="applyFilters()" class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500">
+                        <option value="ALL">All Domains</option>
+                        <option value="Finance & Sales">Finance & Sales</option>
+                        <option value="Supply Chain & Logistics">Supply Chain & Logistics</option>
+                        <option value="E-Commerce & Marketing">E-Commerce & Marketing</option>
+                        <option value="Healthcare Analytics">Healthcare Analytics</option>
+                        <option value="HR & People Analytics">HR & People Analytics</option>
+                        <option value="Retail Analytics">Retail Analytics</option>
+                    </select>
+
+                    <!-- View Switcher -->
+                    <div class="flex border border-slate-700 rounded-xl bg-slate-900 p-0.5">
+                        <button id="gridViewBtn" onclick="setViewMode('grid')" class="px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition">
+                            <i class="fa-solid fa-border-all"></i>
+                        </button>
+                        <button id="listViewBtn" onclick="setViewMode('list')" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PROJECT CARDS GRID / LIST -->
+        <section>
+            <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically Populated Cards -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-16 bg-slate-800/40 rounded-2xl border border-dashed border-slate-700">
+                <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
+                <h4 class="text-base font-semibold text-slate-300">No Matching Projects Found</h4>
+                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try clearing search filters or select a different tool tab.</p>
+                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded-xl transition">Clear All Filters</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- 4. CASE STUDY DETAIL MODAL -->
+    <div id="caseStudyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-slate-900/95 border-b border-slate-800 p-5 flex items-center justify-between z-20 backdrop-blur">
+                <div class="flex items-center gap-3">
+                    <span id="csToolBadge" class="px-3 py-1 rounded-lg text-xs font-bold border">Power BI</span>
+                    <span id="csDomain" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Domain</span>
+                </div>
+                <button onclick="closeModal('caseStudyModal')" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 space-y-6">
+                <div>
+                    <h2 id="csTitle" class="text-2xl font-extrabold text-white mb-2">Project Title</h2>
+                    <p id="csSummary" class="text-sm text-slate-300 leading-relaxed"></p>
+                </div>
+
+                <!-- Value Added / Impact Card -->
+                <div class="bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-xl flex items-center gap-3">
+                    <div class="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Business Value Added & Key Outcome</p>
+                        <p id="csImpact" class="text-sm text-slate-200 font-semibold mt-0.5"></p>
+                    </div>
+                </div>
+
+                <!-- Methods / Tech Stack Tags -->
+                <div class="space-y-1.5">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Methods & Tech Stack Used</h4>
+                    <div id="csMethods" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Preview Visual -->
+                <div id="csImageContainer" class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 max-h-80 flex items-center justify-center">
+                    <img id="csImage" src="" alt="Project Visual" class="w-full h-auto object-cover max-h-80" onerror="this.src='https://placehold.co/800x400/1e293b/94a3b8?text=Project+Preview'">
+                </div>
+
+                <!-- Problem & Approach -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
+                        <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye"></i> Business Problem & Objective
+                        </h4>
+                        <p id="csProblem" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                    <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
+                        <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-database"></i> Data Architecture & Transformation
+                        </h4>
+                        <p id="csDataPrep" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                </div>
+
+                <!-- Key Insights -->
+                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb"></i> Key Insights & Discoveries
+                    </h4>
+                    <p id="csInsights" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                </div>
+
+                <!-- Code Snippet / DAX / Formula -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                        <span class="flex items-center gap-2" id="csCodeHeader"><i class="fa-solid fa-code text-cyan-400"></i> Query / Formula / Code Snippet</span>
+                        <button onclick="copyCodeSnippet()" class="text-slate-400 hover:text-white text-xs lowercase">
+                            <i class="fa-regular fa-copy"></i> copy snippet
+                        </button>
+                    </h4>
+                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto text-xs text-emerald-400 font-mono"><code id="csCode">-- Snippet placeholder</code></pre>
+                </div>
+
+                <!-- Modal Footer Action Links -->
+                <div class="pt-4 border-t border-slate-800 flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center gap-3">
+                        <a id="csGithubLink" href="#" target="_blank" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-2 transition border border-slate-700">
+                            <i class="fa-brands fa-github text-sm"></i> GitHub Repo
+                        </a>
+                        <a id="csDemoLink" href="#" target="_blank" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white flex items-center gap-2 transition shadow">
+                            <i class="fa-solid fa-external-link text-xs"></i> Live Interactive Link
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. ADD / EDIT PROJECT MODAL FORM -->
+    <div id="projectFormModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative">
+            <div class="sticky top-0 bg-slate-900 border-b border-slate-800 p-5 flex items-center justify-between z-20">
+                <h3 id="formModalTitle" class="text-lg font-bold text-white">Add New Data Project</h3>
+                <button onclick="closeModal('projectFormModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="projectForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="formProjectId">
+
+                <!-- Title & Tool Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Project Title *</label>
+                        <input type="text" id="formTitle" required placeholder="e.g. Sales KPI Cohort Dashboard" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Primary Tool *</label>
+                        <select id="formTool" required class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                            <option value="Power BI">Power BI</option>
+                            <option value="Excel">Excel</option>
+                            <option value="SQL">SQL</option>
+                            <option value="Tableau">Tableau</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Domain & Impact -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Domain / Industry *</label>
+                        <select id="formDomain" required class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                            <option value="Finance & Sales">Finance & Sales</option>
+                            <option value="Supply Chain & Logistics">Supply Chain & Logistics</option>
+                            <option value="E-Commerce & Marketing">E-Commerce & Marketing</option>
+                            <option value="Healthcare Analytics">Healthcare Analytics</option>
+                            <option value="HR & People Analytics">HR & People Analytics</option>
+                            <option value="Retail Analytics">Retail Analytics</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Key Business Value / Impact *</label>
+                        <input type="text" id="formImpact" required placeholder="e.g. Saved $45k in holding costs, Reduced query time by 60%" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Methods / Tech Stack Tags -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tech Stack / Methods (Comma Separated) *</label>
+                    <input type="text" id="formMethods" required placeholder="e.g. DAX, Power Query, Star Schema, Calculated Fields, Window Functions" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <!-- Summary & Business Problem -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Short Summary (Card Preview) *</label>
+                    <input type="text" id="formSummary" required placeholder="Brief 1-line overview for the project card..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Business Problem & Objective</label>
+                    <textarea id="formProblem" rows="3" placeholder="What business challenge was addressed?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Data Prep & Architecture</label>
+                    <textarea id="formDataPrep" rows="2" placeholder="How was data extracted, transformed, cleaned, or modeled?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Key Insights Discovered</label>
+                    <textarea id="formInsights" rows="3" placeholder="Key analytical discoveries and business recommendations..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- Code / Formula Snippet -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Sample DAX / Formula / SQL Query Snippet</label>
+                    <textarea id="formCode" rows="4" placeholder="DAX measure, Excel formula, or SQL query sample..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- Links & Visual URL -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub Repo URL</label>
+                        <input type="url" id="formGithub" placeholder="https://github.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Live Dashboard / File URL</label>
+                        <input type="url" id="formDemo" placeholder="https://..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Thumbnail Image URL</label>
+                        <input type="url" id="formImage" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('projectFormModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs text-white font-semibold shadow-lg shadow-blue-600/30">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 6. PROFILE EDIT MODAL -->
+    <div id="profileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <h3 class="text-base font-bold text-white">Edit Portfolio Profile</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+                    <input type="text" id="editProfileName" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Role / Headline</label>
+                    <input type="text" id="editProfileRole" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Short Bio</label>
+                    <textarea id="editProfileBio" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Avatar Photo URL</label>
+                    <input type="url" id="editProfileAvatar" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub URL</label>
+                    <input type="url" id="editProfileGithub" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">LinkedIn URL</label>
+                    <input type="url" id="editProfileLinkedin" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal('profileModal')" class="px-4 py-2 bg-slate-800 text-xs text-slate-300 rounded-xl">Cancel</button>
+                <button onclick="saveProfile()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs text-white font-semibold rounded-xl shadow">Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- APP SCRIPT LOGIC -->
+    <script>
+        const LOCAL_STORAGE_KEY = 'datacraft_core_tools_projects_v2';
+        const PROFILE_STORAGE_KEY = 'datacraft_core_tools_profile_v2';
+
+        // TOOL CONFIGURATIONS
+        const TOOL_CONFIG = {
+            'Power BI': {
+                icon: 'fa-solid fa-chart-column',
+                badgeBg: 'bg-yellow-500/10',
+                border: 'border-yellow-500/30',
+                text: 'text-yellow-400',
+                btnBg: 'bg-yellow-500',
+                gradient: 'from-yellow-500/20 to-amber-500/5'
+            },
+            'Excel': {
+                icon: 'fa-solid fa-file-excel',
+                badgeBg: 'bg-emerald-500/10',
+                border: 'border-emerald-500/30',
+                text: 'text-emerald-400',
+                btnBg: 'bg-emerald-600',
+                gradient: 'from-emerald-500/20 to-teal-500/5'
+            },
+            'SQL': {
+                icon: 'fa-solid fa-database',
+                badgeBg: 'bg-sky-500/10',
+                border: 'border-sky-500/30',
+                text: 'text-sky-400',
+                btnBg: 'bg-sky-600',
+                gradient: 'from-sky-500/20 to-blue-500/5'
+            },
+            'Tableau': {
+                icon: 'fa-solid fa-chart-area',
+                badgeBg: 'bg-orange-500/10',
+                border: 'border-orange-500/30',
+                text: 'text-orange-400',
+                btnBg: 'bg-orange-600',
+                gradient: 'from-orange-500/20 to-red-500/5'
+            }
+        };
+
+        // 12 DISTINCT SAMPLE PROJECTS (3 per tool)
+        const SAMPLE_PROJECTS = [
+            // --- POWER BI PROJECTS (3) ---
+            {
+                id: 'pb-1',
+                title: 'Executive Sales & Profitability Dashboard',
+                tool: 'Power BI',
+                domain: 'Finance & Sales',
+                summary: 'Interactive enterprise sales dashboard with DAX time-intelligence metrics, regional profit variance, and target forecasting.',
+                impact: 'Identified low-margin product lines, boosting Q3 gross margin by 4.2% ($110k value).',
+                methods: ['DAX Time Intelligence', 'Power Query ETL', 'Star Schema Data Model', 'RLS Security'],
+                problem: 'Executive leadership lacked real-time visibility into region-level sales margins and target progress across 15 sub-regions.',
+                dataPrep: 'Extracted raw SQL transactions, cleaned null currency values via Power Query, and constructed a 1-to-many Star Schema with DimDate.',
+                insights: '• Mid-Atlantic region exceeded target by 18%, while Southern branch suffered from heavy product discount leakage.\n• Sub-category B generated high revenue volume but zero net contribution after logistics overhead.',
+                code: `// Time Intelligence DAX Measure
+YTD_Sales_Variance = 
+VAR CurrentYTD = TOTALYTD(SUM(Sales[Revenue]), 'Calendar'[Date])
+VAR PriorYTD = TOTALYTD(SUM(Sales[Revenue]), SAMEPERIODLASTYEAR('Calendar'[Date]))
+RETURN
+DIVIDE(CurrentYTD - PriorYTD, PriorYTD, 0)`,
+                github: 'https://github.com',
+                demo: 'https://powerbi.microsoft.com',
+                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'pb-2',
+                title: 'Supply Chain & Logistics Control Tower',
+                tool: 'Power BI',
+                domain: 'Supply Chain & Logistics',
+                summary: 'End-to-end logistics monitoring dashboard tracking OTIF (On-Time In-Full) delivery rates, carrier performance, and warehouse cycle times.',
+                impact: 'Reduced late shipment penalties by 22% and saved $68k in expedited carrier fees.',
+                methods: ['Decomposition Tree', 'Key Influencers Visual', 'DAX Measures', 'Field Parameters'],
+                problem: 'Logistics directors struggled to pin down exact root causes for order delays across 4 central distribution fulfillment hubs.',
+                dataPrep: 'Combined ERP shipping logs with third-party carrier status API feeds inside Power Query, resolving timestamp format mismatches.',
+                insights: '• Hub-3 experienced a 3.4-hour packaging bottleneck specifically during Friday afternoon peak shifts.\n• Carrier X had an OTIF score of only 71% on cross-border routes.',
+                code: `// OTIF Calculation Measure
+OTIF_Rate_% = 
+VAR TotalOrders = COUNT(Fulfillment[OrderID])
+VAR OnTimeInFull = CALCULATE(
+    COUNT(Fulfillment[OrderID]), 
+    Fulfillment[IsOnTime] = TRUE(), 
+    Fulfillment[IsInFull] = TRUE()
+)
+RETURN DIVIDE(OnTimeInFull, TotalOrders, 0)`,
+                github: 'https://github.com',
+                demo: 'https://powerbi.microsoft.com',
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'pb-3',
+                title: 'Customer Churn & Retention Analytics Tracker',
+                tool: 'Power BI',
+                domain: 'E-Commerce & Marketing',
+                summary: 'Predictive churn dashboard analyzing user engagement scoring, subscription renewal rates, and cohort survival curves.',
+                impact: 'Increased customer retention rate by 8.5%, protecting $185k in annual recurring revenue.',
+                methods: ['DAX Cohort Analysis', 'Dynamic Parameters', 'User Security Filters', 'Custom Tooltips'],
+                problem: 'Subscription team had high churn among month-3 subscribers without actionable indicators to target pre-churn intervention.',
+                dataPrep: 'Ingested raw event user telemetry and monthly billings into Power Query. Normalized subscription pause/cancellation states.',
+                insights: '• Users with fewer than 3 logins during month-2 exhibited an 82% likelihood of canceling in month-3.\n• Target discount prompts sent on day 45 reduced churn by over 30%.',
+                code: `// Monthly Active User (MAU) Churn Rate
+Churn_Rate = 
+VAR ActiveStart = CALCULATE(DISTINCTCOUNT(Users[UserID]), DATEADD('Calendar'[Date], -1, MONTH))
+VAR LostUsers = CALCULATE(DISTINCTCOUNT(Users[UserID]), Users[Status] = "Cancelled")
+RETURN DIVIDE(LostUsers, ActiveStart, 0)`,
+                github: 'https://github.com',
+                demo: 'https://powerbi.microsoft.com',
+                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80'
+            },
+
+            // --- EXCEL PROJECTS (3) ---
+            {
+                id: 'ex-1',
+                title: 'Financial Modeling & 3-Statement Forecasting',
+                tool: 'Excel',
+                domain: 'Finance & Sales',
+                summary: 'Dynamic 3-statement financial model (IS, BS, CFS) with scenario analysis toggles (Base, Bear, Bull) and DCF valuation.',
+                impact: 'Streamlined quarterly board financial presentations and model scenario stress-testing.',
+                methods: ['INDEX/MATCH', 'XLOOKUP', 'VBA Macros', 'Data Tables', 'Dynamic Arrays'],
+                problem: 'Finance team relied on static spreadsheets with hardcoded formulas that broke during multi-scenario budgeting.',
+                dataPrep: 'Structured trial balance inputs using dynamic array formulas (LET, LAMBDA) and automated refresh loops with VBA.',
+                insights: '• 5% reduction in COGS generates higher net margin impact than a 12% top-line revenue expansion.\n• Working capital buffer needed adjustment for Q4 inventory buildup.',
+                code: `' Excel VBA Macro for Automated Scenario Sensitivity Analysis
+Sub RunScenarioSensitivities()
+    Application.ScreenUpdating = False
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("FinancialModel")
+    ws.Range("B5:F15").Calculate
+    Application.ScreenUpdating = True
+    MsgBox "Financial Model Scenarios Calculated!", vbInformation
+End Sub`,
+                github: 'https://github.com',
+                demo: 'https://microsoft.com/excel',
+                image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'ex-2',
+                title: 'Automated Inventory Reorder & Safety Stock Matrix',
+                tool: 'Excel',
+                domain: 'Supply Chain & Logistics',
+                summary: 'Automated inventory planning model calculating Economic Order Quantity (EOQ), reorder points, and automated stockout alerts.',
+                impact: 'Identified $45k in unnecessary inventory holding costs while eliminating stockouts for top SKUs.',
+                methods: ['Power Query', 'Conditional Formatting', 'XLOOKUP', 'LET & LAMBDA Functions'],
+                problem: 'Warehouse supervisors manually placed stock orders on gut feeling, resulting in overstock of slow-moving items.',
+                dataPrep: 'Connected Power Query directly to warehouse database CSV exports, applying automated cleansing and SKU normalization.',
+                insights: '• Top 10% SKUs generated 70% of velocity but suffered stockouts twice per quarter.\n• Safety stock formula reduced overall warehouse holding footprint by 16%.',
+                code: `=LET(
+    AvgDailySales, AVERAGE(Table_Sales[Units]),
+    LeadTime, XLOOKUP(A2, Table_SKU[SKU], Table_SKU[LeadDays]),
+    SafetyStock, STDEV.S(Table_Sales[Units]) * SQRT(LeadTime) * 1.65,
+    ReorderPoint, (AvgDailySales * LeadTime) + SafetyStock,
+    IF(C2 <= ReorderPoint, "REORDER NOW", "OK")
+)`,
+                github: 'https://github.com',
+                demo: 'https://microsoft.com/excel',
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'ex-3',
+                title: 'Sales KPI Cohort & Dynamic Pivot Analysis',
+                tool: 'Excel',
+                domain: 'Retail Analytics',
+                summary: 'Comprehensive retail sales model utilizing Slicers, Pivot Charts, Data Validation, and dynamic cohort retention matrices.',
+                impact: 'Pinpointed customer repeat purchase frequency, boosting repeat transaction revenue by 14%.',
+                methods: ['Pivot Tables & Charts', 'Slicers', 'SUMIFS/COUNTIFS', 'Data Validation'],
+                problem: 'Regional retail managers lacked a quick, no-code spreadsheet to evaluate monthly store level sales cohorts.',
+                dataPrep: 'Cleaned 12 months of POS raw registers using Excel Power Query, standardizing date formats and eliminating return transactions.',
+                insights: '• Repeat purchase velocity peaks at week 3 post-initial acquisition.\n• Tier-1 cities show 2.3x higher multi-item basket size compared to suburban outlets.',
+                code: `=SUMIFS(
+    Data_POS[Revenue], 
+    Data_POS[Region], "North", 
+    Data_POS[Category], $B$4, 
+    Data_POS[Date], ">="&$C$1, 
+    Data_POS[Date], "<="&$C$2
+)`,
+                github: 'https://github.com',
+                demo: 'https://microsoft.com/excel',
+                image: 'https://images.unsplash.com/photo-1556742049-0a67d51421be?w=800&auto=format&fit=crop&q=80'
+            },
+
+            // --- SQL PROJECTS (3) ---
+            {
+                id: 'sql-1',
+                title: 'E-Commerce Lifetime Value & RFM Segmentation',
+                tool: 'SQL',
+                domain: 'E-Commerce & Marketing',
+                summary: 'Complex PostgreSQL query suite calculating Recency, Frequency, and Monetary (RFM) scores and customer lifetime value cohorts.',
+                impact: 'Provided data foundation for segmented marketing campaigns, increasing repeat order ROI by 24%.',
+                methods: ['Window Functions (NTILE, DENSE_RANK)', 'CTEs', 'Date Aggregations', 'CASE Statements'],
+                problem: 'Database contained 2M+ raw order records without structured customer tier labels for marketing automation.',
+                dataPrep: 'Structured multi-stage SQL CTEs to handle invoice deduplication, currency conversions, and aggregated customer totals.',
+                insights: '• Top "Champions" tier (RFM 555) comprised only 4.8% of user base but generated 41% of net gross revenue.\n• "At Risk" tier customers responded best to high-percentage product discount triggers.',
+                code: `WITH Customer_RFM AS (
+    SELECT 
+        customer_id,
+        MAX(order_date) AS last_order_date,
+        COUNT(order_id) AS frequency,
+        SUM(total_amount) AS monetary,
+        CURRENT_DATE - MAX(order_date) AS recency
+    FROM orders
+    GROUP BY customer_id
+),
+RFM_Scores AS (
+    SELECT customer_id,
+        NTILE(5) OVER (ORDER BY recency DESC) AS r_score,
+        NTILE(5) OVER (ORDER BY frequency ASC) AS f_score,
+        NTILE(5) OVER (ORDER BY monetary ASC) AS m_score
+    FROM Customer_RFM
+)
+SELECT customer_id, (r_score || f_score || m_score) AS rfm_segment
+FROM RFM_Scores;`,
+                github: 'https://github.com',
+                demo: 'https://postgresql.org',
+                image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sql-2',
+                title: 'Healthcare Readmission Cohort & Risk Query Suite',
+                tool: 'SQL',
+                domain: 'Healthcare Analytics',
+                summary: 'Advanced SQL diagnostic pipeline identifying patient 30-day hospital readmission factors and risk stratification.',
+                impact: 'Reduced ETL query runtime by 60% via indexing and optimized SQL joins, surfacing high-risk readmissions early.',
+                methods: ['LAG/LEAD Functions', 'Self-Joins', 'Indexed Views', 'Partitioned CTEs'],
+                problem: 'Clinical database queries were unindexed and took over 45 minutes to compile 30-day patient re-hospitalization cohorts.',
+                dataPrep: 'Created materialization strategies and partitioned indexes on encounter admission timestamps.',
+                insights: '• Patients admitted with >2 chronic conditions had a 3.2x higher 30-day readmission rate.\n• Follow-up contact within 48 hours post-discharge reduced readmission risk by 19%.',
+                code: `WITH PatientEncounters AS (
+    SELECT 
+        patient_id,
+        encounter_id,
+        discharge_date,
+        LEAD(admission_date) OVER (
+            PARTITION BY patient_id ORDER BY admission_date
+        ) AS next_admission_date
+    FROM hospital_encounters
+)
+SELECT 
+    patient_id,
+    discharge_date,
+    next_admission_date,
+    (next_admission_date - discharge_date) AS days_to_readmit
+FROM PatientEncounters
+WHERE (next_admission_date - discharge_date) <= 30;`,
+                github: 'https://github.com',
+                demo: 'https://postgresql.org',
+                image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'sql-3',
+                title: 'Financial Fraud & Transaction Anomaly Detection',
+                tool: 'SQL',
+                domain: 'Finance & Sales',
+                summary: 'Real-time financial anomaly identification scripts flagging rapid successive transactions and geographic leaps.',
+                impact: 'Prevented $120k in fraudulent debit card transaction chargebacks during pilot execution.',
+                methods: ['HAVING Filtering', 'Subqueries', 'Geographic Distance Functions', 'Window Frame Aggregations'],
+                problem: 'Legacy batch fraud scripts ran only once daily, allowing fraudulent transactions to settle before flagging.',
+                dataPrep: 'Constructed efficient streaming CTE pipelines analyzing rolling time windows (5-minute rolling sums).',
+                insights: '• 92% of fraudulent activities involved rapid sequential transactions under $5 threshold prior to large transfers.\n• Cross-country IP switches within 10 minutes flagged 99% accuracy in account takeover attempts.',
+                code: `SELECT 
+    card_id,
+    transaction_time,
+    amount,
+    AVG(amount) OVER(
+        PARTITION BY card_id 
+        ORDER BY transaction_time 
+        ROWS BETWEEN 10 PRECEDING AND 1 PRECEDING
+    ) AS rolling_avg_amt
+FROM card_transactions
+WHERE amount > 5 * (
+    SELECT AVG(amount) FROM card_transactions WHERE transaction_time > NOW() - INTERVAL '30 DAYS'
+);`,
+                github: 'https://github.com',
+                demo: 'https://postgresql.org',
+                image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80'
+            },
+
+            // --- TABLEAU PROJECTS (3) ---
+            {
+                id: 'tb-1',
+                title: 'Global Supply Chain Risk Analysis & Map Dashboard',
+                tool: 'Tableau',
+                domain: 'Supply Chain & Logistics',
+                summary: 'Interactive geospatial supply chain risk map with custom LOD expressions, port congestion metrics, and route risk layers.',
+                impact: 'Enabled logistics team to re-route 15% of shipments around congested maritime ports, avoiding severe port delays.',
+                methods: ['LOD Expressions (FIXED, INCLUDE)', 'Geospatial Mapping', 'Dual-Axis Charts', 'Parameters & Actions'],
+                problem: 'Global shipping coordinators lacked a unified geographical visual interface showing real-time port delays and weather alerts.',
+                dataPrep: 'Blended global port congestion feeds with historical shipment manifests inside Tableau Prep Builder.',
+                insights: '• West Coast port transit delays increased lead times by 6.2 days compared to East Coast terminals.\n• Alternate rail routes provided a 12% cost advantage during peak holiday shipping season.',
+                code: `// Tableau Level of Detail (LOD) Expression for Port Delay Average
+{ FIXED [Port Name], [Region] : AVG([Delay Days]) }
+
+// Parameter-Driven Metric Toggle Calculated Field
+CASE [Metric Selector Parameter]
+    WHEN "Shipment Volume" THEN [Total Units]
+    WHEN "Delay Risk Score" THEN [Risk Index]
+    WHEN "Freight Cost" THEN [Transport Cost]
+END`,
+                github: 'https://github.com',
+                demo: 'https://public.tableau.com',
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'tb-2',
+                title: 'Retail Store Performance & Heatmap Dashboard',
+                tool: 'Tableau',
+                domain: 'Retail Analytics',
+                summary: 'Comprehensive retail store benchmarking dashboard using density heatmaps, spatial store footprints, and basket size metrics.',
+                impact: 'Supported store layout re-design that improved high-margin item impulse purchases by 11%.',
+                methods: ['Density Heatmaps', 'Table Calculations', 'Dashboard Action Filters', 'Custom Shapes'],
+                problem: 'Retail regional managers had difficulty comparing store performance metrics across diverse footprint sizes.',
+                dataPrep: 'Cleaned store POS transaction logs, created calculated ratios for Revenue per Square Foot.',
+                insights: '• Stores with end-cap promotions had 22% higher overall basket size.\n• Suburban locations had higher weekend foot traffic but lower overall basket margin compared to urban centers.',
+                code: `// Tableau Table Calculation for Percentage of Total Sales
+SUM([Sales]) / TOTAL(SUM([Sales]))
+
+// Store Margin Calculation
+([Total Revenue] - [Total COGS]) / [Total Revenue]`,
+                github: 'https://github.com',
+                demo: 'https://public.tableau.com',
+                image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'tb-3',
+                title: 'HR Turnover & Employee Sentiment Analytics',
+                tool: 'Tableau',
+                domain: 'HR & People Analytics',
+                summary: 'People analytics dashboard highlighting attrition risk drivers, salary band equity, and employee sentiment score trends.',
+                impact: 'Helped HR team reduce voluntary engineering department turnover by 14% via targeted stay interviews.',
+                methods: ['Box Plots', 'Radar Charts', 'Tableau Story Points', 'Calculated Groups'],
+                problem: 'HR leadership lacked clear visualization on why mid-level software engineers were departing between months 18 and 24.',
+                dataPrep: 'Anonymized HR exit survey inputs and connected work anniversary tenure metrics inside Tableau Desktop.',
+                insights: '• Primary turnover driver for month 18-24 employees was perceived lack of career progression rather than compensation.\n• Hybrid working teams showed 25% higher satisfaction sentiment scores.',
+                code: `// Employee Turnover Rate Calculation
+COUNTD(IF [Employment Status] = "Terminated" THEN [Employee ID] END) 
+/ 
+COUNTD([Employee ID])`,
+                github: 'https://github.com',
+                demo: 'https://public.tableau.com',
+                image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80'
+            }
+        ];
+
+        // STATE MANAGERS
+        let projects = [];
+        let profile = {};
+        let activeToolTab = 'ALL';
+        let currentViewMode = 'grid';
+        let isPublicMode = false;
+
+        // INITIALIZATION
+        window.onload = function() {
+            loadProfile();
+            loadProjects();
+            renderAll();
+        };
+
+        // STORAGE FUNCTIONS
+        function loadProjects() {
+            const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (saved) {
+                try {
+                    projects = JSON.parse(saved);
+                } catch (e) {
+                    projects = [...SAMPLE_PROJECTS];
+                }
+            } else {
+                projects = [...SAMPLE_PROJECTS];
+                saveProjects();
+            }
+        }
+
+        function saveProjects() {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(projects));
+        }
+
+        function loadProfile() {
+            const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+            if (saved) {
+                try {
+                    profile = JSON.parse(saved);
+                } catch (e) {
+                    profile = getSampleProfile();
+                }
+            } else {
+                profile = getSampleProfile();
+                saveProfileToStorage();
+            }
+            updateProfileUI();
+        }
+
+        function getSampleProfile() {
+            return {
+                name: 'Alex Morgan',
+                role: 'BI & Analytics Engineer | Power BI • Excel • SQL • Tableau',
+                bio: 'Specialized in transforming raw transactional databases into decision-ready executive dashboards, automated financial models, and actionable SQL cohort analyses.',
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+                github: 'https://github.com',
+                linkedin: 'https://linkedin.com',
+                email: 'alex.morgan@example.com'
+            };
+        }
+
+        function saveProfileToStorage() {
+            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+        }
+
+        function updateProfileUI() {
+            document.getElementById('profileName').textContent = profile.name || 'Analyst Name';
+            document.getElementById('profileRole').textContent = profile.role || 'Data Analyst';
+            document.getElementById('profileBio').textContent = profile.bio || '';
+            document.getElementById('profileAvatar').src = profile.avatar || 'https://placehold.co/150';
+            document.getElementById('profileGithub').href = profile.github || '#';
+            document.getElementById('profileLinkedin').href = profile.linkedin || '#';
+            document.getElementById('profileEmail').href = `mailto:${profile.email || ''}`;
+        }
+
+        // RENDER LOGIC
+        function renderAll() {
+            updateToolCounts();
+            const filtered = getFilteredProjects();
+            renderProjectCards(filtered);
+        }
+
+        function updateToolCounts() {
+            const counts = { 'Power BI': 0, 'Excel': 0, 'SQL': 0, 'Tableau': 0 };
+            projects.forEach(p => {
+                if (counts[p.tool] !== undefined) counts[p.tool]++;
+            });
+
+            document.getElementById('countPowerBI').textContent = counts['Power BI'];
+            document.getElementById('countExcel').textContent = counts['Excel'];
+            document.getElementById('countSQL').textContent = counts['SQL'];
+            document.getElementById('countTableau').textContent = counts['Tableau'];
+
+            document.getElementById('badge-ALL').textContent = projects.length;
+            document.getElementById('badge-PowerBI').textContent = counts['Power BI'];
+            document.getElementById('badge-Excel').textContent = counts['Excel'];
+            document.getElementById('badge-SQL').textContent = counts['SQL'];
+            document.getElementById('badge-Tableau').textContent = counts['Tableau'];
+        }
+
+        function getFilteredProjects() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const domainVal = document.getElementById('domainFilter').value;
+
+            return projects.filter(p => {
+                // Tool Tab Filter
+                if (activeToolTab !== 'ALL' && p.tool !== activeToolTab) {
+                    return false;
+                }
+                // Domain Filter
+                if (domainVal !== 'ALL' && p.domain !== domainVal) {
+                    return false;
+                }
+                // Search Query
+                if (searchQuery) {
+                    const matchTitle = p.title.toLowerCase().includes(searchQuery);
+                    const matchDomain = p.domain.toLowerCase().includes(searchQuery);
+                    const matchSummary = p.summary.toLowerCase().includes(searchQuery);
+                    const matchMethods = p.methods && p.methods.some(m => m.toLowerCase().includes(searchQuery));
+                    if (!matchTitle && !matchDomain && !matchSummary && !matchMethods) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+
+        function switchToolTab(tool) {
+            activeToolTab = tool;
+            
+            // Tab button styles
+            const tools = ['ALL', 'PowerBI', 'Excel', 'SQL', 'Tableau'];
+            tools.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (!btn) return;
+
+                const matchName = t === 'PowerBI' ? 'Power BI' : t;
+                if (activeToolTab === matchName) {
+                    btn.className = 'tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition bg-blue-600 text-white shadow';
+                } else {
+                    btn.className = 'tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50';
+                }
+            });
+
+            renderAll();
+        }
+
+        function applyFilters() {
+            renderAll();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('domainFilter').value = 'ALL';
+            switchToolTab('ALL');
+        }
+
+        // RENDER CARDS
+        function renderProjectCards(list) {
+            const container = document.getElementById('projectsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (list.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            if (currentViewMode === 'grid') {
+                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            } else {
+                container.className = 'flex flex-col gap-4';
+            }
+
+            container.innerHTML = list.map(p => {
+                const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
+                
+                const methodBadges = (p.methods || []).map(m => 
+                    `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/90 text-slate-300 border border-slate-700/80">${m}</span>`
+                ).join('');
+
+                if (currentViewMode === 'grid') {
+                    return `
+                    <div class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-500 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col group relative">
+                        <!-- Top Image -->
+                        <div class="relative h-44 overflow-hidden bg-slate-950">
+                            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x300/1e293b/94a3b8?text=${encodeURIComponent(p.title)}'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                            
+                            <!-- Tool Badge Floating -->
+                            <div class="absolute top-3 left-3">
+                                <span class="px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border} backdrop-blur flex items-center gap-1.5 shadow-md">
+                                    <i class="${config.icon}"></i> ${p.tool}
+                                </span>
+                            </div>
+
+                            <!-- Domain Badge -->
+                            <div class="absolute top-3 right-3">
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 backdrop-blur">${p.domain}</span>
+                            </div>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                            <div>
+                                <h3 class="text-base font-extrabold text-white group-hover:text-blue-300 transition line-clamp-1">${p.title}</h3>
+                                <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">${p.summary}</p>
+                            </div>
+
+                            <!-- Value Impact Box -->
+                            <div class="bg-slate-900/80 border border-slate-700/60 p-3 rounded-xl text-xs text-emerald-400 font-medium flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0"></i>
+                                <span class="line-clamp-2">${p.impact}</span>
+                            </div>
+
+                            <!-- Methods Used -->
+                            <div class="flex flex-wrap gap-1.5 pt-1">
+                                ${methodBadges}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
+                                <button onclick="openCaseStudy('${p.id}')" class="flex-1 ${config.btnBg} hover:opacity-90 text-white px-3 py-2 rounded-xl text-xs font-bold transition text-center shadow">
+                                    View Full Case Study
+                                </button>
+                                ${!isPublicMode ? `
+                                <button onclick="editProject('${p.id}')" class="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl text-xs transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    // List View
+                    return `
+                    <div class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-500 rounded-2xl p-4 shadow-md transition flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 w-full sm:w-auto">
+                            <img src="${p.image}" alt="${p.title}" class="w-16 h-16 rounded-xl object-cover hidden sm:block bg-slate-950" onerror="this.src='https://placehold.co/100/1e293b/94a3b8?text=Project'">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${config.badgeBg} ${config.text} border ${config.border}"><i class="${config.icon} mr-1"></i>${p.tool}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300">${p.domain}</span>
+                                </div>
+                                <h3 class="text-sm font-bold text-white hover:text-blue-300 transition">${p.title}</h3>
+                                <p class="text-xs text-slate-400 line-clamp-1 mt-0.5">${p.summary}</p>
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    ${methodBadges}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-700">
+                            <button onclick="openCaseStudy('${p.id}')" class="${config.btnBg} hover:opacity-90 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                                Details
+                            </button>
+                            ${!isPublicMode ? `
+                            <button onclick="editProject('${p.id}')" class="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs transition">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl text-xs transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            ` : ''}
+                        </div>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        // CASE STUDY DISPLAY
+        function openCaseStudy(id) {
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+
+            const config = TOOL_CONFIG[project.tool] || TOOL_CONFIG['Power BI'];
+
+            document.getElementById('csTitle').textContent = project.title;
+            document.getElementById('csSummary').textContent = project.summary;
+            document.getElementById('csDomain').textContent = project.domain;
+            document.getElementById('csImpact').textContent = project.impact;
+            document.getElementById('csProblem').textContent = project.problem || 'Not specified.';
+            document.getElementById('csDataPrep').textContent = project.dataPrep || 'Not specified.';
+            document.getElementById('csInsights').textContent = project.insights || 'Not specified.';
+            document.getElementById('csCode').textContent = project.code || '-- No code snippet provided.';
+            document.getElementById('csImage').src = project.image;
+            document.getElementById('csGithubLink').href = project.github || '#';
+            document.getElementById('csDemoLink').href = project.demo || '#';
+
+            // Tool Badge Styling
+            const badge = document.getElementById('csToolBadge');
+            badge.className = `px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border}`;
+            badge.innerHTML = `<i class="${config.icon} mr-1"></i> ${project.tool}`;
+
+            // Methods tags
+            const methodsContainer = document.getElementById('csMethods');
+            methodsContainer.innerHTML = (project.methods || []).map(m => 
+                `<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700">${m}</span>`
+            ).join('');
+
+            openModal('caseStudyModal');
+        }
+
+        // FORM MODAL HANDLERS
+        function openProjectModal(editId = null) {
+            const form = document.getElementById('projectForm');
+            form.reset();
+
+            if (editId) {
+                const p = projects.find(item => item.id === editId);
+                if (!p) return;
+                document.getElementById('formModalTitle').textContent = 'Edit Data Project';
+                document.getElementById('formProjectId').value = p.id;
+                document.getElementById('formTitle').value = p.title;
+                document.getElementById('formTool').value = p.tool;
+                document.getElementById('formDomain').value = p.domain;
+                document.getElementById('formImpact').value = p.impact;
+                document.getElementById('formMethods').value = (p.methods || []).join(', ');
+                document.getElementById('formSummary').value = p.summary;
+                document.getElementById('formProblem').value = p.problem || '';
+                document.getElementById('formDataPrep').value = p.dataPrep || '';
+                document.getElementById('formInsights').value = p.insights || '';
+                document.getElementById('formCode').value = p.code || '';
+                document.getElementById('formGithub').value = p.github || '';
+                document.getElementById('formDemo').value = p.demo || '';
+                document.getElementById('formImage').value = p.image || '';
+            } else {
+                document.getElementById('formModalTitle').textContent = 'Add New Data Project';
+                document.getElementById('formProjectId').value = '';
+                // Pre-select tool if active filter tab is specific
+                if (activeToolTab !== 'ALL') {
+                    document.getElementById('formTool').value = activeToolTab;
+                }
+            }
+
+            openModal('projectFormModal');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const methodsArray = document.getElementById('formMethods').value
+                .split(',')
+                .map(m => m.trim())
+                .filter(m => m.length > 0);
+
+            const id = document.getElementById('formProjectId').value || 'proj-' + Date.now();
+            const projectData = {
+                id: id,
+                title: document.getElementById('formTitle').value,
+                tool: document.getElementById('formTool').value,
+                domain: document.getElementById('formDomain').value,
+                impact: document.getElementById('formImpact').value,
+                methods: methodsArray,
+                summary: document.getElementById('formSummary').value,
+                problem: document.getElementById('formProblem').value,
+                dataPrep: document.getElementById('formDataPrep').value,
+                insights: document.getElementById('formInsights').value,
+                code: document.getElementById('formCode').value,
+                github: document.getElementById('formGithub').value,
+                demo: document.getElementById('formDemo').value,
+                image: document.getElementById('formImage').value || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80'
+            };
+
+            const existingIndex = projects.findIndex(p => p.id === id);
+            if (existingIndex > -1) {
+                projects[existingIndex] = projectData;
+                showToast('Project updated successfully!');
+            } else {
+                projects.unshift(projectData);
+                showToast('New project added to portfolio!');
+            }
+
+            saveProjects();
+            renderAll();
+            closeModal('projectFormModal');
+        }
+
+        function editProject(id) {
+            openProjectModal(id);
+        }
+
+        function deleteProject(id) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                projects = projects.filter(p => p.id !== id);
+                saveProjects();
+                renderAll();
+                showToast('Project deleted', 'info');
+            }
+        }
+
+        // PROFILE EDIT
+        function openProfileModal() {
+            document.getElementById('editProfileName').value = profile.name || '';
+            document.getElementById('editProfileRole').value = profile.role || '';
+            document.getElementById('editProfileBio').value = profile.bio || '';
+            document.getElementById('editProfileAvatar').value = profile.avatar || '';
+            document.getElementById('editProfileGithub').value = profile.github || '';
+            document.getElementById('editProfileLinkedin').value = profile.linkedin || '';
+            openModal('profileModal');
+        }
+
+        function saveProfile() {
+            profile.name = document.getElementById('editProfileName').value;
+            profile.role = document.getElementById('editProfileRole').value;
+            profile.bio = document.getElementById('editProfileBio').value;
+            profile.avatar = document.getElementById('editProfileAvatar').value;
+            profile.github = document.getElementById('editProfileGithub').value;
+            profile.linkedin = document.getElementById('editProfileLinkedin').value;
+
+            saveProfileToStorage();
+            updateProfileUI();
+            closeModal('profileModal');
+            showToast('Profile saved!');
+        }
+
+        // VIEW CONTROLS & RECRUITER MODE
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+
+            if (mode === 'grid') {
+                gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition';
+                listBtn.className = 'px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition';
+            } else {
+                listBtn.className = 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition';
+                gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition';
+            }
+            renderAll();
+        }
+
+        function togglePublicMode() {
+            isPublicMode = !isPublicMode;
+            const btnText = document.getElementById('publicModeText');
+            const addBtn = document.getElementById('mainAddBtn');
+            const editProfBtn = document.getElementById('editProfileBtn');
+
+            if (isPublicMode) {
+                btnText.textContent = 'Exit Recruiter View';
+                addBtn.classList.add('hidden');
+                editProfBtn.classList.add('hidden');
+                showToast('Recruiter View active', 'info');
+            } else {
+                btnText.textContent = 'Recruiter View Mode';
+                addBtn.classList.remove('hidden');
+                editProfBtn.classList.remove('hidden');
+                showToast('Edit controls enabled', 'info');
+            }
+            renderAll();
+        }
+
+        // UTILITY HELPERS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-blue-400';
+
+            toast.className = 'bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs pointer-events-auto transform transition duration-300 translate-y-2';
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function copyCodeSnippet() {
+            const codeText = document.getElementById('csCode').innerText;
+            const temp = document.createElement('textarea');
+            temp.value = codeText;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('Code snippet copied!');
+        }
+
+        function toggleTheme() {
+            const body = document.getElementById('appBody');
+            body.classList.toggle('dark');
+            if (body.classList.contains('dark')) {
+                body.className = 'bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200 dark';
+            } else {
+                body.className = 'bg-slate-100 text-slate-800 min-h-screen transition-colors duration-200';
+            }
+        }
+
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, projects }, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `datacraft_core_tools_backup_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchorElem.click();
+            showToast('Portfolio exported as JSON!');
+        }
+
+        function importJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.projects && Array.isArray(parsed.projects)) {
+                        projects = parsed.projects;
+                        saveProjects();
+                    }
+                    if (parsed.profile) {
+                        profile = parsed.profile;
+                        saveProfileToStorage();
+                        updateProfileUI();
+                    }
+                    renderAll();
+                    showToast('Portfolio imported!');
+                } catch (err) {
+                    showToast('Invalid JSON file', 'error');
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function resetToSampleData() {
+            if (confirm('Reset to 12 sample core projects? Custom entries will be replaced.')) {
+                projects = [...SAMPLE_PROJECTS];
+                profile = getSampleProfile();
+                saveProjects();
+                saveProfileToStorage();
+                updateProfileUI();
+                renderAll();
+                showToast('12 Core Projects restored!');
+            }
+        }
+    </script>
+</body>
+</html>
+```eor
