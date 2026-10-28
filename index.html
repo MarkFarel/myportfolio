@@ -747,8 +747,8 @@
         // DEFAULT SAMPLE SKILLS
         const SAMPLE_SKILLS = [
             { id: 'sk-1', name: 'SQL', subtext: '(PostgreSQL, BigQuery, Snowflake)', level: 95, color: 'blue' },
-            { id: 'sk-2', name: 'Power BI & DAX Modeling', subtext: '', level: 92, color: 'yellow' },
-            { id: 'sk-3', name: 'Advanced Excel', subtext: '(VBA, Power Query, Financial Models)', level: 95, color: 'emerald' },
+            { id: 'sk-2', name: 'Advanced Excel', subtext: '(VBA, Power Query, Financial Models)', level: 95, color: 'emerald' },
+            { id: 'sk-3', name: 'Power BI & DAX Modeling', subtext: '', level: 92, color: 'yellow' },
             { id: 'sk-4', name: 'Tableau Desktop & Server', subtext: '', level: 90, color: 'orange' },
             { id: 'sk-5', name: 'Python', subtext: '(Pandas, Scikit-Learn, Streamlit)', level: 88, color: 'indigo' },
             { id: 'sk-6', name: 'dbt & Data Warehouse ETL/ELT', subtext: '', level: 82, color: 'sky' }
@@ -1292,6 +1292,9 @@ COUNTD([Employee ID])`,
         function renderSkills() {
             const container = document.getElementById('skillsContainer');
             if (!container) return;
+
+            // Automatically sort skills in descending order based on level percentage
+            skills.sort((a, b) => b.level - a.level);
 
             const colorGradients = {
                 blue: 'from-blue-600 to-indigo-600',
