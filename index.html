@@ -60,7 +60,7 @@
                     <i id="themeIcon" class="fa-solid fa-moon"></i>
                 </button>
 
-                <!-- Admin Controls (Completely Hidden unless authenticated via URL password) -->
+                <!-- Admin Controls (Hidden unless authenticated via URL password) -->
                 <button onclick="openProfileModal()" id="editProfileBtn" class="hidden px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition items-center gap-2">
                     <i class="fa-solid fa-user-pen text-amber-500 dark:text-amber-400"></i>
                     <span class="hidden md:inline">Profile</span>
@@ -111,6 +111,65 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- DYNAMIC SKILLS & CAREER HISTORY SECTION -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Analytics Stack Proficiency -->
+            <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-6 shadow-xl backdrop-blur transition-colors flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black">
+                                <i class="fa-solid fa-code text-base"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Analytics Stack Proficiency</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Core technical competencies & tool mastery</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Admin Action Button for Skills -->
+                        <button onclick="openSkillModal()" id="adminAddSkillBtn" class="hidden px-2.5 py-1 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-500/30 transition items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Skill
+                        </button>
+                    </div>
+
+                    <div id="skillsContainer" class="space-y-4">
+                        <!-- Skills rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Career History -->
+            <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-6 shadow-xl backdrop-blur transition-colors flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-600/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black">
+                                <i class="fa-solid fa-briefcase text-base"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Career History</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Professional experience & key roles</p>
+                            </div>
+                        </div>
+
+                        <!-- Admin Action Button for Career -->
+                        <button onclick="openCareerModal()" id="adminAddCareerBtn" class="hidden px-2.5 py-1 rounded-xl bg-amber-600/10 hover:bg-amber-600/20 text-amber-600 dark:text-amber-400 text-xs font-bold border border-amber-500/30 transition items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Experience
+                        </button>
+                    </div>
+
+                    <div id="careersContainer" class="relative border-l-2 border-slate-200 dark:border-slate-700 ml-3 space-y-6">
+                        <!-- Career timeline rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -186,7 +245,7 @@
                         <i class="fa-solid fa-upload"></i>
                         <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
                     </label>
-                    <button onclick="resetToSampleData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 rounded-xl text-xs transition" title="Reset to Sample 12 Projects">
+                    <button onclick="resetToSampleData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 rounded-xl text-xs transition" title="Reset to Sample Data">
                         <i class="fa-solid fa-rotate-left"></i>
                     </button>
                 </div>
@@ -422,7 +481,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Key Code / DAX / SQL / Formula Snippet</label>
-                    <textarea id="formCode" rows="3" font-mono class="w-full px-3 py-2 bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500"></textarea>
+                    <textarea id="formCode" rows="3" class="w-full px-3 py-2 bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <!-- Cover Image Source Upload Area -->
@@ -533,14 +592,111 @@
         </div>
     </div>
 
+    <!-- Add / Edit Skill Modal -->
+    <div id="skillModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full shadow-2xl p-6 relative text-slate-800 dark:text-slate-100">
+            <button onclick="closeModal('skillModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 id="skillModalTitle" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Add Skill Entry</h3>
+
+            <form id="skillForm" onsubmit="handleSkillSubmit(event)" class="space-y-4">
+                <input type="hidden" id="formSkillId">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Skill Name *</label>
+                    <input type="text" id="formSkillName" required placeholder="e.g. SQL" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Subtext / Tools Included</label>
+                    <input type="text" id="formSkillSubtext" placeholder="e.g. (PostgreSQL, BigQuery, Snowflake)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Proficiency % (1-100)</label>
+                        <input type="number" id="formSkillLevel" required min="1" max="100" placeholder="95" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Bar Color Accent</label>
+                        <select id="formSkillColor" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                            <option value="blue">Blue</option>
+                            <option value="yellow">Yellow</option>
+                            <option value="emerald">Emerald</option>
+                            <option value="orange">Orange</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="sky">Sky Blue</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeModal('skillModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Save Skill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add / Edit Career Modal -->
+    <div id="careerModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full shadow-2xl p-6 relative text-slate-800 dark:text-slate-100">
+            <button onclick="closeModal('careerModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 id="careerModalTitle" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Add Career Entry</h3>
+
+            <form id="careerForm" onsubmit="handleCareerSubmit(event)" class="space-y-4">
+                <input type="hidden" id="formCareerId">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Job Role Title *</label>
+                    <input type="text" id="formCareerRole" required placeholder="e.g. Senior Data Analyst" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Company Name *</label>
+                    <input type="text" id="formCareerCompany" required placeholder="e.g. TechFlow Analytics" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Date Range *</label>
+                        <input type="text" id="formCareerPeriod" required placeholder="e.g. 2023 - Present" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Dot Indicator Color</label>
+                        <select id="formCareerColor" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                            <option value="blue">Blue</option>
+                            <option value="indigo">Indigo</option>
+                            <option value="emerald">Emerald</option>
+                            <option value="amber">Amber</option>
+                            <option value="slate">Slate</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Role Description / Key Achievements *</label>
+                    <textarea id="formCareerDetail" required rows="3" placeholder="Leading cross-functional analytics for product and marketing teams..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeModal('careerModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold">Save Experience</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Main Application JavaScript Engine -->
     <script>
         // CORE CONSTANTS & STORAGE KEYS
         const LOCAL_STORAGE_KEY = 'datacraft_projects_v3';
         const PROFILE_STORAGE_KEY = 'datacraft_profile_v3';
+        const SKILLS_STORAGE_KEY = 'datacraft_skills_v3';
+        const CAREERS_STORAGE_KEY = 'datacraft_careers_v3';
         const ADMIN_SESSION_KEY = 'datacraft_admin_authenticated';
         
-        // SET YOUR SECRET ADMIN PASSWORD EXTENSION HERE:
+        // SECRET ADMIN PASSWORD:
         const ADMIN_SECRET_KEY = 'admin123';
 
         // TOOL COLOR SCHEMES AND ICON CONFIGURATIONS
@@ -579,9 +735,25 @@
             }
         };
 
-        // 12 DISTINCT SAMPLE PROJECTS WITH ENHANCED STRUCTURE
+        // DEFAULT SAMPLE SKILLS
+        const SAMPLE_SKILLS = [
+            { id: 'sk-1', name: 'SQL', subtext: '(PostgreSQL, BigQuery, Snowflake)', level: 95, color: 'blue' },
+            { id: 'sk-2', name: 'Power BI & DAX Modeling', subtext: '', level: 92, color: 'yellow' },
+            { id: 'sk-3', name: 'Advanced Excel', subtext: '(VBA, Power Query, Financial Models)', level: 95, color: 'emerald' },
+            { id: 'sk-4', name: 'Tableau Desktop & Server', subtext: '', level: 90, color: 'orange' },
+            { id: 'sk-5', name: 'Python', subtext: '(Pandas, Scikit-Learn, Streamlit)', level: 88, color: 'indigo' },
+            { id: 'sk-6', name: 'dbt & Data Warehouse ETL/ELT', subtext: '', level: 82, color: 'sky' }
+        ];
+
+        // DEFAULT SAMPLE CAREER ENTRIES
+        const SAMPLE_CAREERS = [
+            { id: 'car-1', role: 'Senior Data Analyst', company: 'TechFlow Analytics', period: '2023 - Present', detail: 'Leading cross-functional analytics for product and marketing teams using SQL, Power BI, and Snowflake.', color: 'blue' },
+            { id: 'car-2', role: 'Data Analyst', company: 'DataPulse Solutions', period: '2021 - 2023', detail: 'Automated ETL reporting, wrote complex SQL queries, and built executive Tableau dashboards.', color: 'indigo' },
+            { id: 'car-3', role: 'Junior BI Developer', company: 'FinStat Inc.', period: '2019 - 2021', detail: 'Maintained data warehouses and designed Excel financial models & KPI reporting.', color: 'slate' }
+        ];
+
+        // 12 SAMPLE PROJECTS
         const SAMPLE_PROJECTS = [
-            // --- POWER BI PROJECTS (3) ---
             {
                 id: 'pb-1',
                 title: 'Executive Sales & Profitability Control Tower',
@@ -665,8 +837,6 @@ RETURN DIVIDE(LostUsers, ActiveStart, 0)`,
                 image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
                 attachments: []
             },
-
-            // --- EXCEL PROJECTS (3) ---
             {
                 id: 'ex-1',
                 title: 'Dynamic Financial Modeling & Forecasting Model',
@@ -753,8 +923,6 @@ End Sub`,
                 image: 'https://images.unsplash.com/photo-1556742049-0a67d51421be?w=800&auto=format&fit=crop&q=80',
                 attachments: []
             },
-
-            // --- SQL PROJECTS (3) ---
             {
                 id: 'sql-1',
                 title: 'E-Commerce Lifetime Value & RFM Segmentation Query Suite',
@@ -867,8 +1035,6 @@ WHERE amount > 5 * (
                 image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80',
                 attachments: []
             },
-
-            // --- TABLEAU PROJECTS (3) ---
             {
                 id: 'tb-1',
                 title: 'Global Supply Chain Risk Analysis Map',
@@ -955,6 +1121,8 @@ COUNTD([Employee ID])`,
         // STATE MANAGERS
         let projects = [];
         let profile = {};
+        let skills = [];
+        let careers = [];
         let activeToolTab = 'ALL';
         let currentViewMode = 'grid';
         let isAdminLoggedIn = false;
@@ -969,6 +1137,8 @@ COUNTD([Employee ID])`,
         window.onload = function() {
             checkAdminURLAccess();
             loadProfile();
+            loadSkills();
+            loadCareers();
             loadProjects();
             renderAll();
         };
@@ -978,16 +1148,12 @@ COUNTD([Employee ID])`,
             const urlParams = new URLSearchParams(window.location.search);
             const adminQuery = urlParams.get('admin');
 
-            // Check if URL contains secret key
             if (adminQuery === ADMIN_SECRET_KEY) {
                 isAdminLoggedIn = true;
                 sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
-                
-                // Clean the password out of the URL bar cleanly without reloading page
                 window.history.replaceState({}, document.title, window.location.pathname);
                 showToast('Admin Mode Unlocked via URL!');
             } else {
-                // Check existing session storage
                 const session = sessionStorage.getItem(ADMIN_SESSION_KEY);
                 isAdminLoggedIn = (session === 'true');
             }
@@ -1009,26 +1175,24 @@ COUNTD([Employee ID])`,
             const logoutBtn = document.getElementById('adminLogoutBtn');
             const backupControls = document.getElementById('adminBackupControls');
             const csCoverWrapper = document.getElementById('csCoverChangeWrapper');
+            const addSkillBtn = document.getElementById('adminAddSkillBtn');
+            const addCareerBtn = document.getElementById('adminAddCareerBtn');
 
             if (isAdminLoggedIn) {
-                addBtn.classList.remove('hidden');
-                addBtn.classList.add('flex');
-                editProfBtn.classList.remove('hidden');
-                editProfBtn.classList.add('flex');
-                logoutBtn.classList.remove('hidden');
-                logoutBtn.classList.add('flex');
-                backupControls.classList.remove('hidden');
-                backupControls.classList.add('flex');
+                addBtn?.classList.replace('hidden', 'flex');
+                editProfBtn?.classList.replace('hidden', 'flex');
+                logoutBtn?.classList.replace('hidden', 'flex');
+                backupControls?.classList.replace('hidden', 'flex');
+                addSkillBtn?.classList.replace('hidden', 'flex');
+                addCareerBtn?.classList.replace('hidden', 'flex');
                 if(csCoverWrapper) csCoverWrapper.classList.remove('hidden');
             } else {
-                addBtn.classList.add('hidden');
-                addBtn.classList.remove('flex');
-                editProfBtn.classList.add('hidden');
-                editProfBtn.classList.remove('flex');
-                logoutBtn.classList.add('hidden');
-                logoutBtn.classList.remove('flex');
-                backupControls.classList.add('hidden');
-                backupControls.classList.remove('flex');
+                addBtn?.classList.replace('flex', 'hidden');
+                editProfBtn?.classList.replace('flex', 'hidden');
+                logoutBtn?.classList.replace('flex', 'hidden');
+                backupControls?.classList.replace('flex', 'hidden');
+                addSkillBtn?.classList.replace('flex', 'hidden');
+                addCareerBtn?.classList.replace('flex', 'hidden');
                 if(csCoverWrapper) csCoverWrapper.classList.add('hidden');
             }
         }
@@ -1037,29 +1201,19 @@ COUNTD([Employee ID])`,
         function loadProjects() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
-                try {
-                    projects = JSON.parse(saved);
-                } catch (e) {
-                    projects = [...SAMPLE_PROJECTS];
-                }
+                try { projects = JSON.parse(saved); } catch (e) { projects = [...SAMPLE_PROJECTS]; }
             } else {
                 projects = [...SAMPLE_PROJECTS];
                 saveProjects();
             }
         }
 
-        function saveProjects() {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(projects));
-        }
+        function saveProjects() { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(projects)); }
 
         function loadProfile() {
             const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
             if (saved) {
-                try {
-                    profile = JSON.parse(saved);
-                } catch (e) {
-                    profile = getSampleProfile();
-                }
+                try { profile = JSON.parse(saved); } catch (e) { profile = getSampleProfile(); }
             } else {
                 profile = getSampleProfile();
                 saveProfileToStorage();
@@ -1079,9 +1233,31 @@ COUNTD([Employee ID])`,
             };
         }
 
-        function saveProfileToStorage() {
-            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+        function saveProfileToStorage() { localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile)); }
+
+        function loadSkills() {
+            const saved = localStorage.getItem(SKILLS_STORAGE_KEY);
+            if (saved) {
+                try { skills = JSON.parse(saved); } catch (e) { skills = [...SAMPLE_SKILLS]; }
+            } else {
+                skills = [...SAMPLE_SKILLS];
+                saveSkillsToStorage();
+            }
         }
+
+        function saveSkillsToStorage() { localStorage.setItem(SKILLS_STORAGE_KEY, JSON.stringify(skills)); }
+
+        function loadCareers() {
+            const saved = localStorage.getItem(CAREERS_STORAGE_KEY);
+            if (saved) {
+                try { careers = JSON.parse(saved); } catch (e) { careers = [...SAMPLE_CAREERS]; }
+            } else {
+                careers = [...SAMPLE_CAREERS];
+                saveCareersToStorage();
+            }
+        }
+
+        function saveCareersToStorage() { localStorage.setItem(CAREERS_STORAGE_KEY, JSON.stringify(careers)); }
 
         function updateProfileUI() {
             document.getElementById('profileName').textContent = profile.name || 'Analyst Name';
@@ -1095,9 +1271,205 @@ COUNTD([Employee ID])`,
 
         // RENDER LOGIC
         function renderAll() {
+            renderSkills();
+            renderCareers();
             updateToolCounts();
             const filtered = getFilteredProjects();
             renderProjectCards(filtered);
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            if (!container) return;
+
+            const colorGradients = {
+                blue: 'from-blue-600 to-indigo-600',
+                yellow: 'from-amber-500 to-yellow-500',
+                emerald: 'from-emerald-600 to-teal-500',
+                orange: 'from-orange-500 to-amber-500',
+                indigo: 'from-indigo-500 to-purple-600',
+                sky: 'from-sky-500 to-cyan-500'
+            };
+
+            const colorText = {
+                blue: 'text-blue-600 dark:text-blue-400',
+                yellow: 'text-yellow-600 dark:text-yellow-400',
+                emerald: 'text-emerald-600 dark:text-emerald-400',
+                orange: 'text-orange-600 dark:text-orange-400',
+                indigo: 'text-indigo-600 dark:text-indigo-400',
+                sky: 'text-sky-600 dark:text-sky-400'
+            };
+
+            container.innerHTML = skills.map(s => `
+                <div>
+                    <div class="flex justify-between items-center text-xs font-bold mb-1.5">
+                        <span class="text-slate-800 dark:text-slate-200">
+                            ${s.name} ${s.subtext ? `<span class="text-slate-500 font-normal">${s.subtext}</span>` : ''}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="${colorText[s.color] || colorText.blue}">${s.level}%</span>
+                            ${isAdminLoggedIn ? `
+                                <button onclick="openSkillModal('${s.id}')" class="text-slate-400 hover:text-blue-500 text-[11px]"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteSkill('${s.id}')" class="text-slate-400 hover:text-rose-500 text-[11px]"><i class="fa-solid fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="w-full h-2 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
+                        <div class="h-full bg-gradient-to-r ${colorGradients[s.color] || colorGradients.blue} rounded-full" style="width: ${s.level}%;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCareers() {
+            const container = document.getElementById('careersContainer');
+            if (!container) return;
+
+            const dotColors = {
+                blue: 'bg-blue-600',
+                indigo: 'bg-indigo-500',
+                emerald: 'bg-emerald-500',
+                amber: 'bg-amber-500',
+                slate: 'bg-slate-400 dark:bg-slate-600'
+            };
+
+            container.innerHTML = careers.map(c => `
+                <div class="relative pl-6">
+                    <span class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full ${dotColors[c.color] || dotColors.blue} border-4 border-white dark:border-slate-800"></span>
+                    <div class="flex flex-wrap justify-between items-baseline gap-1">
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">${c.role}</h4>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">${c.period}</span>
+                            ${isAdminLoggedIn ? `
+                                <button onclick="openCareerModal('${c.id}')" class="text-slate-400 hover:text-blue-500 text-[11px]"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteCareer('${c.id}')" class="text-slate-400 hover:text-rose-500 text-[11px]"><i class="fa-solid fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">${c.company}</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${c.detail}</p>
+                </div>
+            `).join('');
+        }
+
+        // SKILLS MODAL & CRUD
+        function openSkillModal(id = null) {
+            if (!isAdminLoggedIn) return;
+            const form = document.getElementById('skillForm');
+            form.reset();
+
+            if (id) {
+                const s = skills.find(item => item.id === id);
+                if (!s) return;
+                document.getElementById('skillModalTitle').textContent = 'Edit Skill Entry';
+                document.getElementById('formSkillId').value = s.id;
+                document.getElementById('formSkillName').value = s.name;
+                document.getElementById('formSkillSubtext').value = s.subtext || '';
+                document.getElementById('formSkillLevel').value = s.level;
+                document.getElementById('formSkillColor').value = s.color || 'blue';
+            } else {
+                document.getElementById('skillModalTitle').textContent = 'Add Skill Entry';
+                document.getElementById('formSkillId').value = '';
+            }
+            openModal('skillModal');
+        }
+
+        function handleSkillSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const id = document.getElementById('formSkillId').value || 'sk-' + Date.now();
+            const skillData = {
+                id: id,
+                name: document.getElementById('formSkillName').value,
+                subtext: document.getElementById('formSkillSubtext').value,
+                level: parseInt(document.getElementById('formSkillLevel').value, 10),
+                color: document.getElementById('formSkillColor').value
+            };
+
+            const idx = skills.findIndex(s => s.id === id);
+            if (idx > -1) {
+                skills[idx] = skillData;
+                showToast('Skill entry updated!');
+            } else {
+                skills.push(skillData);
+                showToast('New skill added!');
+            }
+
+            saveSkillsToStorage();
+            renderSkills();
+            closeModal('skillModal');
+        }
+
+        function deleteSkill(id) {
+            if (!isAdminLoggedIn) return;
+            if (confirm('Delete this skill entry?')) {
+                skills = skills.filter(s => s.id !== id);
+                saveSkillsToStorage();
+                renderSkills();
+                showToast('Skill deleted', 'info');
+            }
+        }
+
+        // CAREER MODAL & CRUD
+        function openCareerModal(id = null) {
+            if (!isAdminLoggedIn) return;
+            const form = document.getElementById('careerForm');
+            form.reset();
+
+            if (id) {
+                const c = careers.find(item => item.id === id);
+                if (!c) return;
+                document.getElementById('careerModalTitle').textContent = 'Edit Career Entry';
+                document.getElementById('formCareerId').value = c.id;
+                document.getElementById('formCareerRole').value = c.role;
+                document.getElementById('formCareerCompany').value = c.company;
+                document.getElementById('formCareerPeriod').value = c.period;
+                document.getElementById('formCareerColor').value = c.color || 'blue';
+                document.getElementById('formCareerDetail').value = c.detail;
+            } else {
+                document.getElementById('careerModalTitle').textContent = 'Add Career Entry';
+                document.getElementById('formCareerId').value = '';
+            }
+            openModal('careerModal');
+        }
+
+        function handleCareerSubmit(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const id = document.getElementById('formCareerId').value || 'car-' + Date.now();
+            const careerData = {
+                id: id,
+                role: document.getElementById('formCareerRole').value,
+                company: document.getElementById('formCareerCompany').value,
+                period: document.getElementById('formCareerPeriod').value,
+                color: document.getElementById('formCareerColor').value,
+                detail: document.getElementById('formCareerDetail').value
+            };
+
+            const idx = careers.findIndex(c => c.id === id);
+            if (idx > -1) {
+                careers[idx] = careerData;
+                showToast('Career entry updated!');
+            } else {
+                careers.unshift(careerData);
+                showToast('New experience added!');
+            }
+
+            saveCareersToStorage();
+            renderCareers();
+            closeModal('careerModal');
+        }
+
+        function deleteCareer(id) {
+            if (!isAdminLoggedIn) return;
+            if (confirm('Delete this career entry?')) {
+                careers = careers.filter(c => c.id !== id);
+                saveCareersToStorage();
+                renderCareers();
+                showToast('Career entry deleted', 'info');
+            }
         }
 
         function updateToolCounts() {
@@ -1183,12 +1555,10 @@ COUNTD([Employee ID])`,
                 if (currentViewMode === 'grid') {
                     return `
                     <div class="bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/70 hover:border-slate-400 dark:hover:border-slate-500 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col group relative">
-                        <!-- Top Image -->
                         <div class="relative h-44 overflow-hidden bg-slate-950">
                             <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x300/1e293b/94a3b8?text=${encodeURIComponent(p.title)}'">
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
                             
-                            <!-- Direct Change Cover Image Button on Card (Admin Only) -->
                             ${isAdminLoggedIn ? `
                             <div class="absolute top-3 right-3 opacity-90 hover:opacity-100 z-10">
                                 <button type="button" onclick="triggerCardCoverChange('${p.id}')" class="bg-slate-900/90 hover:bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg backdrop-blur flex items-center space-x-1.5 transition border border-slate-700/80">
@@ -1198,39 +1568,33 @@ COUNTD([Employee ID])`,
                             </div>
                             ` : ''}
 
-                            <!-- Tool Badge Floating -->
                             <div class="absolute top-3 left-3">
                                 <span class="px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border} backdrop-blur flex items-center gap-1.5 shadow-md">
                                     <i class="${config.icon}"></i> ${p.tool}
                                 </span>
                             </div>
 
-                            <!-- Domain Badge -->
                             <div class="absolute bottom-3 left-3 flex gap-1">
                                 ${hasAttachments ? '<span class="px-2 py-1 rounded-lg text-[10px] font-semibold bg-emerald-900/95 text-emerald-300 border border-emerald-700/80 backdrop-blur" title="Has Local Attachments"><i class="fa-solid fa-paperclip"></i></span>' : ''}
                                 <span class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 backdrop-blur">${p.domain}</span>
                             </div>
                         </div>
 
-                        <!-- Body -->
                         <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
                             <div>
                                 <h3 class="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition line-clamp-1">${p.title}</h3>
                                 <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">${p.summary}</p>
                             </div>
 
-                            <!-- Value Impact Box -->
                             <div class="bg-emerald-50 dark:bg-slate-900/80 border border-emerald-200 dark:border-slate-700/60 p-3 rounded-xl text-xs text-emerald-700 dark:text-emerald-400 font-medium flex items-start gap-2">
                                 <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0"></i>
                                 <span class="line-clamp-2">${p.impact}</span>
                             </div>
 
-                            <!-- Methods Used -->
                             <div class="flex flex-wrap gap-1.5 pt-1">
                                 ${methodBadges}
                             </div>
 
-                            <!-- Action Buttons -->
                             <div class="pt-3 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-2">
                                 <button onclick="openCaseStudy('${p.id}')" class="flex-1 ${config.btnBg} hover:opacity-90 text-white px-3 py-2 rounded-xl text-xs font-bold transition text-center shadow">
                                     View Case Study
@@ -1286,7 +1650,6 @@ COUNTD([Employee ID])`,
             }).join('');
         }
 
-        // DIRECT CARD COVER CHANGE LOGIC
         function triggerCardCoverChange(projectId) {
             if (!isAdminLoggedIn) return;
             targetCardCoverId = projectId;
@@ -1347,7 +1710,6 @@ COUNTD([Employee ID])`,
             document.getElementById('csImpact').textContent = project.impact;
             document.getElementById('csProblem').textContent = project.problem || 'No scenario overview provided.';
             
-            // Format Learning Opportunities
             const learningsContainer = document.getElementById('csLearnings');
             if (project.learnings && Array.isArray(project.learnings) && project.learnings.length > 0) {
                 learningsContainer.innerHTML = project.learnings.map(item => 
@@ -1367,17 +1729,14 @@ COUNTD([Employee ID])`,
             document.getElementById('csGithubLink').href = project.github || '#';
             document.getElementById('csDemoLink').href = project.demo || '#';
 
-            // Tool Badge
             const badge = document.getElementById('csToolBadge');
             badge.className = `px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border}`;
             badge.innerHTML = `<i class="${config.icon} mr-1"></i> ${project.tool}`;
 
-            // Method Badges
             document.getElementById('csMethods').innerHTML = (project.methods || []).map(m => 
                 `<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700">${m}</span>`
             ).join('');
 
-            // Screenshot Gallery
             const gallery = document.getElementById('csImageGallery');
             gallery.innerHTML = `
                 <div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 group cursor-pointer" onclick="zoomImage('${project.image}')">
@@ -1388,7 +1747,6 @@ COUNTD([Employee ID])`,
                 </div>
             `;
 
-            // Local Attachments Card Render
             const attachmentsContainer = document.getElementById('csAttachmentsContainer');
             if (project.attachments && project.attachments.length > 0) {
                 attachmentsContainer.innerHTML = project.attachments.map((att, idx) => `
@@ -1719,7 +2077,7 @@ COUNTD([Employee ID])`,
 
         function exportJSON() {
             if (!isAdminLoggedIn) return;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, projects }, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, skills, careers, projects }, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", `datacraft_core_tools_backup_${new Date().toISOString().split('T')[0]}.json`);
@@ -1742,6 +2100,14 @@ COUNTD([Employee ID])`,
                         saveProfileToStorage();
                         updateProfileUI();
                     }
+                    if (parsed.skills && Array.isArray(parsed.skills)) {
+                        skills = parsed.skills;
+                        saveSkillsToStorage();
+                    }
+                    if (parsed.careers && Array.isArray(parsed.careers)) {
+                        careers = parsed.careers;
+                        saveCareersToStorage();
+                    }
                     renderAll();
                     showToast('Portfolio imported!');
                 } catch (err) {
@@ -1753,14 +2119,18 @@ COUNTD([Employee ID])`,
 
         function resetToSampleData() {
             if (!isAdminLoggedIn) return;
-            if (confirm('Reset to 12 sample core projects? Custom entries will be replaced.')) {
+            if (confirm('Reset all portfolio entries (skills, careers, projects) to sample defaults?')) {
                 projects = [...SAMPLE_PROJECTS];
+                skills = [...SAMPLE_SKILLS];
+                careers = [...SAMPLE_CAREERS];
                 profile = getSampleProfile();
                 saveProjects();
+                saveSkillsToStorage();
+                saveCareersToStorage();
                 saveProfileToStorage();
                 updateProfileUI();
                 renderAll();
-                showToast('12 Core Projects restored!');
+                showToast('Sample data restored!');
             }
         }
     </script>
