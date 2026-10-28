@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Analytics Portfolio Manager & Multi-Template Builder</title>
+    <title>Data Analyst Portfolio Manager - Core Tools Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,18 +11,10 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'JetBrains Mono', 'Consolas', 'monospace']
-                    },
                     colors: {
                         darkbg: '#0f172a',
                         darkcard: '#1e293b',
-                        darkborder: '#334155',
-                        powerbi: { DEFAULT: '#f2c811', bg: 'rgba(242, 200, 17, 0.12)', border: 'rgba(242, 200, 17, 0.3)', text: '#facc15' },
-                        excel: { DEFAULT: '#107c41', bg: 'rgba(16, 124, 65, 0.15)', border: 'rgba(16, 124, 65, 0.35)', text: '#34d399' },
-                        sql: { DEFAULT: '#00758f', bg: 'rgba(0, 117, 143, 0.18)', border: 'rgba(56, 189, 248, 0.35)', text: '#38bdf8' },
-                        tableau: { DEFAULT: '#e97627', bg: 'rgba(233, 118, 39, 0.15)', border: 'rgba(233, 118, 39, 0.35)', text: '#fb923c' }
+                        darkborder: '#334155'
                     }
                 }
             }
@@ -31,380 +23,346 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: inherit; }
+        ::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        /* Terminal Theme Custom Styling */
-        .theme-terminal {
-            background-color: #050811 !important;
-            color: #10b981 !important;
-            font-family: 'Fira Code', monospace !important;
-        }
-        .theme-terminal .card-item {
-            background-color: #022c22 !important;
-            border-color: #059669 !important;
-            color: #6ee7b7 !important;
-        }
-
-        /* Glassmorphism Styling */
-        .theme-glass .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200" id="appBody">
+<body id="appBody" class="bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200 dark">
 
-    <!-- ADMIN FLOATING TOOLBAR (Visible ONLY in ?admin=true mode) -->
-    <div id="adminBanner" class="hidden sticky top-0 z-50 bg-slate-950/90 border-b border-blue-500/30 backdrop-blur px-4 py-2 text-xs">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-blue-400 font-bold">
-                <span class="flex h-2 w-2 rounded-full bg-blue-500 animate-ping"></span>
-                <i class="fa-solid fa-user-gear"></i>
-                <span>ADMIN EDITOR MODE ACTIVE</span>
-            </div>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-            <!-- Template Switcher & Admin Controls -->
-            <div class="flex items-center gap-2 flex-wrap">
-                <div class="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700">
-                    <i class="fa-solid fa-palette text-amber-400"></i>
-                    <span class="text-slate-400 font-medium">Layout / Theme:</span>
-                    <select id="templateSelect" onchange="changeTemplate(this.value)" class="bg-slate-800 text-white font-semibold rounded px-2 py-0.5 border border-slate-600 focus:outline-none">
-                        <option value="executive">1. Executive Dark Hub</option>
-                        <option value="bento">2. Bento Grid Minimalist</option>
-                        <option value="terminal">3. Terminal CLI (Retro)</option>
-                        <option value="splitscreen">4. Split-Screen Showcase</option>
-                        <option value="studio">5. Minimalist Executive Studio</option>
-                        <option value="glass">6. Glassmorphism Modern</option>
-                        <option value="timeline">7. Connected Timeline Flow</option>
-                        <option value="table">8. Compact Spreadsheet View</option>
-                    </select>
-                </div>
+    <!-- Hidden File Input for Direct Card Cover Updates -->
+    <input type="file" id="directCardCoverInput" accept="image/*" class="hidden" onchange="handleDirectCardCoverUpload(event)">
 
-                <!-- Export Deployable HTML -->
-                <button onclick="exportStandaloneHTML()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg font-semibold flex items-center gap-1.5 transition shadow">
-                    <i class="fa-solid fa-file-export"></i>
-                    <span>Export Static HTML</span>
-                </button>
-
-                <!-- Data Backup / Restore -->
-                <div class="relative group">
-                    <button class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-                        <i class="fa-solid fa-database text-emerald-400"></i>
-                        <span>Data</span>
-                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                    </button>
-                    <div class="absolute right-0 mt-1 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl hidden group-hover:block z-50 p-1.5">
-                        <button onclick="exportJSON()" class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-700 rounded-lg flex items-center gap-2">
-                            <i class="fa-solid fa-download text-blue-400"></i> Export JSON
-                        </button>
-                        <label class="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-slate-700 rounded-lg flex items-center gap-2 cursor-pointer">
-                            <i class="fa-solid fa-upload text-emerald-400"></i> Import JSON
-                            <input type="file" id="importFileInput" onchange="importJSON(event)" class="hidden" accept=".json">
-                        </label>
-                        <button onclick="resetToSampleData()" class="w-full text-left px-3 py-2 text-xs text-rose-400 hover:bg-slate-700 rounded-lg flex items-center gap-2">
-                            <i class="fa-solid fa-rotate-left"></i> Reset Defaults (12 Projects)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Add Project Button -->
-                <button onclick="openProjectModal()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow transition">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Add Project</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOP NAVIGATION BAR -->
-    <nav class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30 px-4 lg:px-8 py-3.5" id="mainNavbar">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-tr from-blue-600 to-emerald-500 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
-                    <i class="fa-solid fa-layer-group text-xl"></i>
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-700/60 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur sticky top-0 z-30 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-amber-500 flex items-center justify-center text-white shadow-lg font-black text-xl">
+                    D
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg leading-tight tracking-wide bg-gradient-to-r from-blue-400 via-emerald-400 to-amber-300 bg-clip-text text-transparent" id="navTitle">DataCraft Portfolio</h1>
-                    <p class="text-xs text-slate-400">Power BI • Excel • SQL • Tableau Showcase</p>
+                    <h1 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">DataCraft <span class="text-blue-600 dark:text-blue-500">Hub</span></h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Core Analytics Portfolio Manager</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <!-- Light/Dark Mode Switcher -->
-                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Toggle Light/Dark Theme">
-                    <i class="fa-solid fa-sun text-amber-400 hidden dark:inline"></i>
-                    <i class="fa-solid fa-moon text-indigo-400 inline dark:hidden"></i>
+            <!-- Global Action Controls -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="toggleTheme()" class="p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition" title="Toggle Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Admin Controls (Completely Hidden unless authenticated via URL password) -->
+                <button onclick="openProfileModal()" id="editProfileBtn" class="hidden px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition items-center gap-2">
+                    <i class="fa-solid fa-user-pen text-amber-500 dark:text-amber-400"></i>
+                    <span class="hidden md:inline">Profile</span>
+                </button>
+
+                <button onclick="openProjectModal()" id="mainAddBtn" class="hidden px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white shadow-lg shadow-blue-500/20 transition items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Project</span>
+                </button>
+
+                <!-- Hidden Logout button when in admin mode -->
+                <button onclick="lockAdminMode()" id="adminLogoutBtn" class="hidden px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-400 transition items-center gap-1.5" title="Exit Admin Mode">
+                    <i class="fa-solid fa-lock-open"></i>
+                    <span class="hidden md:inline">Exit Admin</span>
                 </button>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6" id="mainContainer">
-
-        <!-- 1. PROFILE HEADER SECTION -->
-        <section id="profileSection" class="bg-slate-800/80 border border-slate-700/70 rounded-2xl p-6 shadow-xl relative overflow-hidden transition-all duration-300 bg-cover bg-center">
-            <div class="flex flex-col md:flex-row justify-between gap-6 relative z-10 items-start md:items-center">
-                <div class="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-                    <div class="relative group">
-                        <img id="profileAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Profile" class="w-20 h-20 rounded-2xl object-cover border-2 border-blue-500/50 shadow-md">
-                        <button id="editProfileBtn" onclick="openProfileModal()" class="admin-only absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg text-xs shadow transition hidden" title="Edit Profile">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-3">
-                            <h2 id="profileName" class="text-2xl font-extrabold text-white tracking-wide">Alex Morgan</h2>
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Data Analytics Specialist</span>
+    <!-- Profile Hero Header -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-6 sm:p-8 backdrop-blur shadow-xl relative overflow-hidden transition-colors">
+            <div class="absolute -top-12 -right-12 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
+                <img id="profileAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-slate-300 dark:border-slate-600 shadow-xl shrink-0">
+                
+                <div class="flex-1 text-center md:text-left space-y-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div>
+                            <h2 id="profileName" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Alex Morgan</h2>
+                            <p id="profileRole" class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-0.5">BI & Analytics Engineer | Power BI • Excel • SQL • Tableau</p>
                         </div>
-                        <p id="profileRole" class="text-blue-400 font-medium text-sm">BI & Analytics Engineer | Power BI • Excel • SQL • Tableau</p>
-                        <p id="profileBio" class="text-slate-400 text-xs sm:text-sm max-w-2xl line-clamp-2">Specialized in transforming raw transactional databases into decision-ready executive dashboards, automated financial models, and actionable SQL cohort analyses.</p>
-                        
-                        <div class="flex items-center gap-4 pt-1 text-xs text-slate-400">
-                            <a id="profileGithub" href="https://github.com" target="_blank" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-brands fa-github text-sm"></i> GitHub</a>
-                            <a id="profileLinkedin" href="https://linkedin.com" target="_blank" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-brands fa-linkedin text-sm"></i> LinkedIn</a>
-                            <a id="profileEmail" href="mailto:alex@example.com" class="hover:text-blue-400 transition flex items-center gap-1.5"><i class="fa-solid fa-envelope text-sm"></i> Email</a>
+                        <div class="flex items-center justify-center md:justify-start space-x-2 text-slate-600 dark:text-slate-400 text-sm">
+                            <a id="profileGithub" href="#" target="_blank" class="p-2 bg-slate-100 dark:bg-slate-900/80 rounded-xl hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 transition" title="GitHub"><i class="fa-brands fa-github text-base"></i></a>
+                            <a id="profileLinkedin" href="#" target="_blank" class="p-2 bg-slate-100 dark:bg-slate-900/80 rounded-xl hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 transition" title="LinkedIn"><i class="fa-brands fa-linkedin text-base"></i></a>
+                            <a id="profileEmail" href="#" class="p-2 bg-slate-100 dark:bg-slate-900/80 rounded-xl hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 transition" title="Email"><i class="fa-solid fa-envelope text-base"></i></a>
                         </div>
                     </div>
-                </div>
 
-                <!-- Core Tool Counters -->
-                <div class="grid grid-cols-4 gap-2 bg-slate-900/80 p-3 rounded-2xl border border-slate-700/60 w-full md:w-auto shrink-0">
-                    <div class="text-center px-2 py-1">
-                        <p class="text-[10px] text-yellow-400 uppercase font-bold tracking-wider">Power BI</p>
-                        <p id="countPowerBI" class="text-xl font-extrabold text-white mt-0.5">3</p>
-                    </div>
-                    <div class="text-center px-2 py-1 border-l border-slate-800">
-                        <p class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Excel</p>
-                        <p id="countExcel" class="text-xl font-extrabold text-white mt-0.5">3</p>
-                    </div>
-                    <div class="text-center px-2 py-1 border-l border-slate-800">
-                        <p class="text-[10px] text-sky-400 uppercase font-bold tracking-wider">SQL</p>
-                        <p id="countSQL" class="text-xl font-extrabold text-white mt-0.5">3</p>
-                    </div>
-                    <div class="text-center px-2 py-1 border-l border-slate-800">
-                        <p class="text-[10px] text-orange-400 uppercase font-bold tracking-wider">Tableau</p>
-                        <p id="countTableau" class="text-xl font-extrabold text-white mt-0.5">3</p>
+                    <p id="profileBio" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed pt-1">
+                        Specialized in transforming raw transactional databases into decision-ready executive dashboards, automated financial models, and actionable SQL cohort analyses.
+                    </p>
+
+                    <div class="pt-3 flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-layer-group text-blue-600 dark:text-blue-400"></i> <strong class="text-slate-900 dark:text-slate-200">4 Core Tools</strong> (Power BI, Excel, SQL, Tableau)</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-square-check text-emerald-600 dark:text-emerald-400"></i> <strong class="text-slate-900 dark:text-slate-200">Production-Ready</strong> Artifacts</span>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 2. CORE TOOL TABS & CONTROLS -->
-        <section class="space-y-4">
-            <!-- Tool Tabs Bar -->
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-slate-800/90 border border-slate-700/70 rounded-2xl shadow-md">
-                <button onclick="switchToolTab('ALL')" id="tab-ALL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition bg-blue-600 text-white shadow">
-                    <i class="fa-solid fa-border-all"></i>
-                    <span>All Tools</span>
-                    <span id="badge-ALL" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900/40 text-white">12</span>
-                </button>
-                <button onclick="switchToolTab('Power BI')" id="tab-PowerBI" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
-                    <i class="fa-solid fa-chart-column text-yellow-400"></i>
-                    <span>Power BI</span>
-                    <span id="badge-PowerBI" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-yellow-400 border border-yellow-500/30">3</span>
-                </button>
-                <button onclick="switchToolTab('Excel')" id="tab-Excel" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
-                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
-                    <span>Excel</span>
-                    <span id="badge-Excel" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-emerald-400 border border-emerald-500/30">3</span>
-                </button>
-                <button onclick="switchToolTab('SQL')" id="tab-SQL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50">
-                    <i class="fa-solid fa-database text-sky-400"></i>
-                    <span>SQL</span>
-                    <span id="badge-SQL" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-sky-400 border border-sky-500/30">3</span>
-                </button>
-                <button onclick="switchToolTab('Tableau')" id="tab-Tableau" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50 col-span-2 sm:col-span-1">
-                    <i class="fa-solid fa-chart-area text-orange-400"></i>
-                    <span>Tableau</span>
-                    <span id="badge-Tableau" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-900 text-orange-400 border border-orange-500/30">3</span>
-                </button>
+    <!-- Tool Category Filter Bar -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-sm transition-colors">
+            <button onclick="switchToolTab('ALL')" id="tab-ALL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition bg-blue-600 text-white shadow">
+                <i class="fa-solid fa-border-all"></i>
+                <span>All Core Tools</span>
+                <span id="badge-ALL" class="px-2 py-0.5 rounded-full text-[10px] bg-black/20 font-extrabold">12</span>
+            </button>
+
+            <button onclick="switchToolTab('Power BI')" id="tab-PowerBI" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                <i class="fa-solid fa-chart-column text-yellow-500 dark:text-yellow-400"></i>
+                <span>Power BI</span>
+                <span id="badge-PowerBI" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-900 font-extrabold text-yellow-600 dark:text-yellow-400">3</span>
+            </button>
+
+            <button onclick="switchToolTab('Excel')" id="tab-Excel" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                <i class="fa-solid fa-file-excel text-emerald-600 dark:text-emerald-400"></i>
+                <span>Excel</span>
+                <span id="badge-Excel" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-900 font-extrabold text-emerald-600 dark:text-emerald-400">3</span>
+            </button>
+
+            <button onclick="switchToolTab('SQL')" id="tab-SQL" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                <i class="fa-solid fa-database text-sky-600 dark:text-sky-400"></i>
+                <span>SQL</span>
+                <span id="badge-SQL" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-900 font-extrabold text-sky-600 dark:text-sky-400">3</span>
+            </button>
+
+            <button onclick="switchToolTab('Tableau')" id="tab-Tableau" class="tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50 col-span-2 sm:col-span-1">
+                <i class="fa-solid fa-chart-area text-orange-500 dark:text-orange-400"></i>
+                <span>Tableau</span>
+                <span id="badge-Tableau" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 dark:bg-slate-900 font-extrabold text-orange-600 dark:text-orange-400">3</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Filters & Search Controls -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors">
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search project title, summary, or method..." class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500">
             </div>
 
-            <!-- Search, Domain Filter & Grid Toggle -->
-            <div class="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
-                <!-- Search Input -->
-                <div class="relative w-full sm:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search title, domain, method, or keyword..." 
-                           class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500">
+            <!-- Domain & Layout Options -->
+            <div class="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                <!-- Domain Dropdown -->
+                <select id="domainFilter" onchange="applyFilters()" class="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-blue-500">
+                    <option value="ALL">All Domains</option>
+                    <option value="Finance & Sales">Finance & Sales</option>
+                    <option value="Supply Chain & Logistics">Supply Chain & Logistics</option>
+                    <option value="E-Commerce & Marketing">E-Commerce & Marketing</option>
+                    <option value="Healthcare Analytics">Healthcare Analytics</option>
+                    <option value="Retail Analytics">Retail Analytics</option>
+                    <option value="HR & People Analytics">HR & People Analytics</option>
+                </select>
+
+                <!-- Grid/List Switch -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-1 space-x-1">
+                    <button onclick="setViewMode('grid')" id="gridViewBtn" class="px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition"><i class="fa-solid fa-grip"></i> Grid</button>
+                    <button onclick="setViewMode('list')" id="listViewBtn" class="px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition"><i class="fa-solid fa-list"></i> List</button>
                 </div>
 
-                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                    <!-- Domain Filter -->
-                    <select id="domainFilter" onchange="applyFilters()" class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500">
-                        <option value="ALL">All Domains</option>
-                        <option value="Finance & Sales">Finance & Sales</option>
-                        <option value="Supply Chain & Logistics">Supply Chain & Logistics</option>
-                        <option value="E-Commerce & Marketing">E-Commerce & Marketing</option>
-                        <option value="Healthcare Analytics">Healthcare Analytics</option>
-                        <option value="HR & People Analytics">HR & People Analytics</option>
-                        <option value="Retail Analytics">Retail Analytics</option>
-                    </select>
-
-                    <!-- View Switcher -->
-                    <div class="flex border border-slate-700 rounded-xl bg-slate-900 p-0.5">
-                        <button id="gridViewBtn" onclick="setViewMode('grid')" class="px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition">
-                            <i class="fa-solid fa-border-all"></i>
-                        </button>
-                        <button id="listViewBtn" onclick="setViewMode('list')" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition">
-                            <i class="fa-solid fa-list"></i>
-                        </button>
-                    </div>
+                <!-- Backup & Reset Controls (Admin Only) -->
+                <div id="adminBackupControls" class="hidden items-center space-x-1 border-l border-slate-300 dark:border-slate-700 pl-3">
+                    <button onclick="exportJSON()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs transition" title="Export JSON Portfolio Backup">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <label class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs transition cursor-pointer" title="Import JSON Portfolio">
+                        <i class="fa-solid fa-upload"></i>
+                        <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
+                    </label>
+                    <button onclick="resetToSampleData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 rounded-xl text-xs transition" title="Reset to Sample 12 Projects">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- 3. PROJECT CARDS CONTAINER -->
-        <section>
-            <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Dynamically Populated Projects -->
-            </div>
+    <!-- Projects Container Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div id="projectsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Project Cards Rendered Dynamically Here -->
+        </div>
 
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden text-center py-16 bg-slate-800/40 rounded-2xl border border-dashed border-slate-700">
-                <i class="fa-solid fa-folder-open text-4xl text-slate-600 mb-3"></i>
-                <h4 class="text-base font-semibold text-slate-300">No Matching Projects Found</h4>
-                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try clearing search filters or select a different tool tab.</p>
-                <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded-xl transition">Clear All Filters</button>
+        <!-- Empty State Container -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 my-8 shadow-sm">
+            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-folder-open"></i>
             </div>
-        </section>
+            <h3 class="text-base font-bold text-slate-800 dark:text-slate-300">No Projects Found</h3>
+            <p class="text-xs text-slate-500 mt-1">Try adjusting your tool filter, domain dropdown, or search term.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-500 transition">
+                Reset All Filters
+            </button>
+        </div>
     </main>
 
-    <!-- 4. CASE STUDY DETAIL MODAL -->
-    <div id="caseStudyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative">
-            <!-- Modal Header -->
-            <div class="sticky top-0 bg-slate-900/95 border-b border-slate-800 p-5 flex items-center justify-between z-20 backdrop-blur">
-                <div class="flex items-center gap-3">
-                    <span id="csToolBadge" class="px-3 py-1 rounded-lg text-xs font-bold border">Power BI</span>
-                    <span id="csDomain" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Domain</span>
+    <!-- Case Study Drawer Modal -->
+    <div id="caseStudyModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative flex flex-col text-slate-800 dark:text-slate-100">
+            <!-- Modal Cover Banner Header -->
+            <div class="relative h-48 sm:h-64 w-full bg-slate-950 overflow-hidden shrink-0">
+                <img id="csImage" src="" alt="Case Study Cover" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                
+                <!-- Direct Change Cover Button on Case Study Header (Admin Only) -->
+                <div id="csCoverChangeWrapper" class="hidden absolute top-4 right-14">
+                    <label class="cursor-pointer bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-medium px-3 py-1.5 rounded-xl shadow-lg backdrop-blur border border-slate-700/80 flex items-center space-x-1.5 transition">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                        <span>Change Cover</span>
+                        <input type="file" accept="image/*" class="hidden" onchange="changeCaseStudyCoverDirectly(event)">
+                    </label>
                 </div>
-                <button onclick="closeModal('caseStudyModal')" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
+
+                <button onclick="closeModal('caseStudyModal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-900/80 text-slate-300 hover:text-white flex items-center justify-center transition border border-slate-700/80">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
+
+                <div class="absolute bottom-4 left-6 right-6">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span id="csToolBadge" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white">Power BI</span>
+                        <span id="csDomain" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/90 text-slate-300 border border-slate-700">Finance & Sales</span>
+                    </div>
+                    <h2 id="csTitle" class="text-xl sm:text-2xl font-extrabold text-white leading-tight">Executive Sales & Profitability Tower</h2>
+                </div>
             </div>
 
-            <!-- Modal Content -->
-            <div class="p-6 space-y-6">
+            <!-- Modal Body Content -->
+            <div class="p-6 space-y-6 flex-1">
+                <!-- Executive Summary -->
+                <div class="bg-slate-100 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">Executive Summary</h4>
+                    <p id="csSummary" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed"></p>
+                </div>
+
+                <!-- Business Problem Overview -->
                 <div>
-                    <h2 id="csTitle" class="text-2xl font-extrabold text-white mb-2">Project Title</h2>
-                    <p id="csSummary" class="text-sm text-slate-300 leading-relaxed"></p>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation"></i> Business Problem Overview
+                    </h4>
+                    <div id="csProblem" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed whitespace-pre-line"></div>
                 </div>
 
-                <!-- Value Impact Card -->
-                <div class="bg-emerald-950/30 border border-emerald-500/30 p-4 rounded-xl flex items-center gap-3">
-                    <div class="p-2.5 bg-emerald-500/20 rounded-xl text-emerald-400">
-                        <i class="fa-solid fa-chart-line text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Business Value Added & Key Outcome</p>
-                        <p id="csImpact" class="text-sm text-slate-200 font-semibold mt-0.5"></p>
-                    </div>
+                <!-- Key Impact & Value Add -->
+                <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/60 p-4 rounded-xl">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> Measurable Business Impact
+                    </h4>
+                    <p id="csImpact" class="text-xs sm:text-sm font-semibold text-emerald-900 dark:text-emerald-200"></p>
                 </div>
 
-                <!-- Tech Stack Tags -->
-                <div class="space-y-1.5">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Methods & Tech Stack Used</h4>
+                <!-- Project Learning Opportunities -->
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb"></i> Key Takeaways & Learnings
+                    </h4>
+                    <div id="csLearnings" class="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300"></div>
+                </div>
+
+                <!-- Methods & Skill Badges -->
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Technical Methods & Tools Used</h4>
                     <div id="csMethods" class="flex flex-wrap gap-2"></div>
                 </div>
 
-                <!-- Attached Resources & Downloads -->
-                <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                    <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-paperclip"></i> Uploaded Resources & Attachments (Dashboards, Slides, Datasets)
-                    </h4>
-                    <div id="csResourcesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <!-- Populated dynamically -->
+                <!-- Data Preparation & Insights Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-2">Data Prep & Modeling</h4>
+                        <p id="csDataPrep" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-2">Key Analytical Discoveries</h4>
+                        <p id="csInsights" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line"></p>
                     </div>
                 </div>
 
-                <!-- Preview Visual -->
-                <div id="csImageContainer" class="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 max-h-80 flex items-center justify-center relative group">
-                    <img id="csImage" src="" alt="Project Visual" class="w-full h-auto object-cover max-h-80" onerror="this.src='https://placehold.co/800x400/1e293b/94a3b8?text=Project+Preview'">
-                </div>
-
-                <!-- Problem & Data Prep -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
-                        <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-bullseye"></i> Business Problem & Objective
-                        </h4>
-                        <p id="csProblem" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
-                    </div>
-                    <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
-                        <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-database"></i> Data Architecture & Transformation
-                        </h4>
-                        <p id="csDataPrep" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
-                    </div>
-                </div>
-
-                <!-- Key Insights -->
-                <div class="bg-slate-800/50 border border-slate-800 p-4 rounded-xl space-y-2">
-                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb"></i> Key Insights & Discoveries
-                    </h4>
-                    <p id="csInsights" class="text-xs text-slate-300 leading-relaxed whitespace-pre-line"></p>
-                </div>
-
-                <!-- Code Snippet / DAX / SQL -->
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                        <span class="flex items-center gap-2" id="csCodeHeader"><i class="fa-solid fa-code text-cyan-400"></i> Query / Formula / Code Snippet</span>
-                        <button onclick="copyCodeSnippet()" class="text-slate-400 hover:text-white text-xs lowercase">
-                            <i class="fa-regular fa-copy"></i> copy snippet
+                <!-- Code / Formula Snippet Block -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Core Code / Formula Snippet</h4>
+                        <button onclick="copyCodeSnippet()" class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 flex items-center gap-1 font-semibold">
+                            <i class="fa-regular fa-copy"></i> Copy Snippet
                         </button>
-                    </h4>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto text-xs text-emerald-400 font-mono"><code id="csCode">-- Snippet placeholder</code></pre>
+                    </div>
+                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-blue-300 overflow-x-auto leading-relaxed"><code id="csCode"></code></pre>
                 </div>
 
-                <!-- Action Links -->
-                <div class="pt-4 border-t border-slate-800 flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-3">
-                        <a id="csGithubLink" href="#" target="_blank" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-2 transition border border-slate-700">
-                            <i class="fa-brands fa-github text-sm"></i> GitHub Repo
-                        </a>
-                        <a id="csDemoLink" href="#" target="_blank" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white flex items-center gap-2 transition shadow">
-                            <i class="fa-solid fa-external-link text-xs"></i> Live Interactive Link
-                        </a>
-                    </div>
+                <!-- Media Screenshot Gallery -->
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Dashboard Screenshot Gallery</h4>
+                    <div id="csImageGallery"></div>
                 </div>
+
+                <!-- Local File Attachments Container -->
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Attached Files & Local Workbooks</h4>
+                    <div id="csAttachmentsContainer" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="p-4 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 rounded-b-2xl">
+                <div class="flex items-center space-x-3">
+                    <a id="csGithubLink" href="#" target="_blank" class="px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-2 border border-slate-300 dark:border-slate-700 transition">
+                        <i class="fa-brands fa-github text-sm"></i> GitHub Repository
+                    </a>
+                    <a id="csDemoLink" href="#" target="_blank" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Live Interactive Demo
+                    </a>
+                </div>
+                <button onclick="closeModal('caseStudyModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs font-bold transition">
+                    Close
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 5. ADD / EDIT PROJECT MODAL FORM (Admin Only) -->
-    <div id="projectFormModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative">
-            <div class="sticky top-0 bg-slate-900 border-b border-slate-800 p-5 flex items-center justify-between z-20">
-                <h3 id="formModalTitle" class="text-lg font-bold text-white">Add New Data Project</h3>
-                <button onclick="closeModal('projectFormModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeModal('imageZoomModal')">
+        <div class="relative max-w-5xl w-full">
+            <img id="zoomedImage" src="" class="w-full max-h-[85vh] object-contain rounded-xl border border-slate-800 shadow-2xl">
+            <p class="text-center text-xs text-slate-400 mt-2">Click anywhere to close preview</p>
+        </div>
+    </div>
 
-            <form id="projectForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+    <!-- Add / Edit Project Form Modal -->
+    <div id="projectFormModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative text-slate-800 dark:text-slate-100">
+            <button onclick="closeModal('projectFormModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 id="formModalTitle" class="text-lg font-bold text-slate-900 dark:text-white mb-4">Add New Data Project</h3>
+
+            <form id="projectForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
                 <input type="hidden" id="formProjectId">
+                <input type="hidden" id="formImageBase64">
 
-                <!-- Title & Primary Tool -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Project Title *</label>
-                        <input type="text" id="formTitle" required placeholder="e.g. Sales KPI Cohort Dashboard" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Project Title *</label>
+                        <input type="text" id="formTitle" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Primary Tool *</label>
-                        <select id="formTool" required class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Primary Core Tool *</label>
+                        <select id="formTool" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                             <option value="Power BI">Power BI</option>
                             <option value="Excel">Excel</option>
                             <option value="SQL">SQL</option>
@@ -413,169 +371,231 @@
                     </div>
                 </div>
 
-                <!-- Domain & Impact -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Domain / Industry *</label>
-                        <select id="formDomain" required class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Business Domain *</label>
+                        <select id="formDomain" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                             <option value="Finance & Sales">Finance & Sales</option>
                             <option value="Supply Chain & Logistics">Supply Chain & Logistics</option>
                             <option value="E-Commerce & Marketing">E-Commerce & Marketing</option>
                             <option value="Healthcare Analytics">Healthcare Analytics</option>
-                            <option value="HR & People Analytics">HR & People Analytics</option>
                             <option value="Retail Analytics">Retail Analytics</option>
+                            <option value="HR & People Analytics">HR & People Analytics</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Key Business Value / Impact *</label>
-                        <input type="text" id="formImpact" required placeholder="e.g. Saved $45k in holding costs, Reduced query time by 60%" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Technical Methods (Comma Separated)</label>
+                        <input type="text" id="formMethods" placeholder="e.g. DAX, Power Query, CTEs" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
 
-                <!-- Tech Stack Tags -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tech Stack / Methods (Comma Separated) *</label>
-                    <input type="text" id="formMethods" required placeholder="e.g. DAX, Power Query, Star Schema, Calculated Fields, Window Functions" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-
-                <!-- Summary & Business Problem -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Short Summary (Card Preview) *</label>
-                    <input type="text" id="formSummary" required placeholder="Brief 1-line overview for the project card..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Measurable Impact Metric *</label>
+                    <input type="text" id="formImpact" required placeholder="e.g. Boosted gross margin by 4.2% ($110k profit increase)" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Business Problem & Objective</label>
-                    <textarea id="formProblem" rows="3" placeholder="What business challenge was addressed?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Executive Summary *</label>
+                    <textarea id="formSummary" required rows="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Data Prep & Architecture</label>
-                    <textarea id="formDataPrep" rows="2" placeholder="How was data extracted, transformed, cleaned, or modeled?" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Business Problem Overview *</label>
+                    <textarea id="formProblem" required rows="2" placeholder="Explain the business problem or context being solved..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Key Insights Discovered</label>
-                    <textarea id="formInsights" rows="3" placeholder="Key analytical discoveries and business recommendations..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Project Learning Opportunities (One per line)</label>
+                    <textarea id="formLearnings" rows="3" placeholder="• Learned how to write complex DAX CALCULATE modifiers&#10;• Solved dynamic context errors" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
 
-                <!-- Snippet -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Sample DAX / Formula / SQL Query Snippet</label>
-                    <textarea id="formCode" rows="4" placeholder="DAX measure, Excel formula, or SQL query sample..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-emerald-400 font-mono focus:outline-none focus:border-blue-500"></textarea>
-                </div>
-
-                <!-- Attachments Upload -->
-                <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl space-y-2">
-                    <label class="block text-xs font-semibold text-blue-400 flex items-center gap-2">
-                        <i class="fa-solid fa-file-arrow-up"></i> Upload Resources & Slides (PBIX, Excel, PDFs, Datasets, PPTX)
-                    </label>
-                    <input type="file" id="formResourceInput" onchange="handleResourceUpload(event)" class="text-xs text-slate-400 block w-full file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
-                    <div id="formResourcesContainer" class="flex flex-wrap gap-2 pt-1"></div>
-                </div>
-
-                <!-- Links & Visual URL -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub Repo URL</label>
-                        <input type="url" id="formGithub" placeholder="https://github.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Data Prep & Modeling Details</label>
+                        <textarea id="formDataPrep" rows="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Live Dashboard / File URL</label>
-                        <input type="url" id="formDemo" placeholder="https://..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Thumbnail Image URL</label>
-                        <input type="url" id="formImage" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Key Insights & Takeaways</label>
+                        <textarea id="formInsights" rows="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                     </div>
                 </div>
 
-                <!-- Form Action Buttons -->
-                <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal('projectFormModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs text-white font-semibold shadow-lg shadow-blue-600/30">Save Project</button>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Key Code / DAX / SQL / Formula Snippet</label>
+                    <textarea id="formCode" rows="3" font-mono class="w-full px-3 py-2 bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- Cover Image Source Upload Area -->
+                <div class="border border-slate-200 dark:border-slate-800 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 space-y-3">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Project Cover Image Source</label>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Local Image File Upload Button -->
+                        <div>
+                            <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Option A: Upload Image File from Local Drive</label>
+                            <label class="flex items-center justify-center gap-2 border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 p-3 rounded-xl cursor-pointer transition text-xs text-slate-700 dark:text-slate-300 font-semibold">
+                                <i class="fa-solid fa-cloud-arrow-up text-blue-600 dark:text-blue-400"></i>
+                                <span>Choose Local Screenshot File</span>
+                                <input type="file" accept="image/*" onchange="handleLocalImageUpload(event)" class="hidden">
+                            </label>
+                        </div>
+
+                        <!-- Local Workbook/Doc Attachment Button -->
+                        <div>
+                            <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Option B: Attach Local File / Workbook</label>
+                            <label class="flex items-center justify-center gap-2 border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 p-3 rounded-xl cursor-pointer transition text-xs text-slate-700 dark:text-slate-300 font-semibold">
+                                <i class="fa-solid fa-paperclip text-emerald-600 dark:text-emerald-400"></i>
+                                <span>Attach PBIX, XLSX, PDF File</span>
+                                <input type="file" accept=".pdf,.xlsx,.xls,.pbix,.twbx,.twb,.sql,.csv" onchange="handleLocalDocumentUpload(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Uploaded Files Status Badge Container -->
+                    <div id="formUploadedFilesPreview" class="hidden pt-2 border-t border-slate-200 dark:border-slate-800">
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold mb-1">Uploaded Local Attachments:</p>
+                        <div id="formAttachmentsList" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">GitHub Repository Link</label>
+                        <input type="url" id="formGithub" placeholder="https://github.com/username/project" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Live Interactive Demo URL</label>
+                        <input type="url" id="formDemo" placeholder="https://powerbi.microsoft.com/..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeModal('projectFormModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/30">
+                        Save Project Entry
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 6. PROFILE EDIT MODAL (Admin Only) -->
-    <div id="profileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 class="text-base font-bold text-white">Edit Portfolio Profile</h3>
-            <div class="space-y-3">
+    <!-- Edit Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full shadow-2xl p-6 relative text-slate-800 dark:text-slate-100">
+            <button onclick="closeModal('profileModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Edit Analyst Profile</h3>
+
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
-                    <input type="text" id="editProfileName" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Full Name</label>
+                    <input type="text" id="editProfileName" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Role / Headline</label>
-                    <input type="text" id="editProfileRole" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Headline / Target Role</label>
+                    <input type="text" id="editProfileRole" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Short Bio</label>
-                    <textarea id="editProfileBio" rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Short Bio</label>
+                    <textarea id="editProfileBio" rows="3" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Avatar Photo URL</label>
-                    <input type="url" id="editProfileAvatar" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200" placeholder="https://images.unsplash.com/...">
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">Profile Avatar Picture</label>
+                    <div class="flex items-center gap-3">
+                        <label class="flex-1 flex items-center justify-center gap-2 border border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 p-2.5 rounded-xl cursor-pointer transition text-xs text-slate-700 dark:text-slate-300 font-semibold">
+                            <i class="fa-solid fa-camera text-blue-600 dark:text-blue-400"></i>
+                            <span>Pick Image from Local Drive</span>
+                            <input type="file" accept="image/*" onchange="handleLocalAvatarUpload(event)" class="hidden">
+                        </label>
+                    </div>
+                    <input type="hidden" id="editProfileAvatar">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Cover Photo URL</label>
-                    <input type="url" id="editProfileCover" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200" placeholder="https://images.unsplash.com/...">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">GitHub Link</label>
+                        <input type="url" id="editProfileGithub" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">LinkedIn Link</label>
+                        <input type="url" id="editProfileLinkedin" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub URL</label>
-                    <input type="url" id="editProfileGithub" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+
+                <div class="pt-4 flex items-center justify-end space-x-3 border-t border-slate-200 dark:border-slate-800">
+                    <button onclick="closeModal('profileModal')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                    <button onclick="saveProfile()" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">Save Changes</button>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">LinkedIn URL</label>
-                    <input type="url" id="editProfileLinkedin" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeModal('profileModal')" class="px-4 py-2 bg-slate-800 text-xs text-slate-300 rounded-xl">Cancel</button>
-                <button onclick="saveProfile()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs text-white font-semibold rounded-xl shadow flex items-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> OK / Save
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- HIDDEN DIRECT FILE INPUT FOR QUICK COVER CHANGE -->
-    <input type="file" id="directCoverFileInput" accept="image/*" class="hidden" onchange="handleDirectCoverUpload(event)">
-
-    <!-- TOAST NOTIFICATIONS -->
-    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-    <!-- MAIN JAVASCRIPT APP ENGINE -->
+    <!-- Main Application JavaScript Engine -->
     <script>
-        const LOCAL_STORAGE_KEY = 'datacraft_core_tools_projects_v2';
-        const PROFILE_STORAGE_KEY = 'datacraft_core_tools_profile_v2';
-        const TEMPLATE_STORAGE_KEY = 'datacraft_template_selected_v2';
+        // CORE CONSTANTS & STORAGE KEYS
+        const LOCAL_STORAGE_KEY = 'datacraft_projects_v3';
+        const PROFILE_STORAGE_KEY = 'datacraft_profile_v3';
+        const ADMIN_SESSION_KEY = 'datacraft_admin_authenticated';
+        
+        // SET YOUR SECRET ADMIN PASSWORD EXTENSION HERE:
+        const ADMIN_SECRET_KEY = 'admin123';
 
-        let targetCoverProjectId = null;
-        let tempFormResources = [];
-
-        // TOOL CONFIGURATIONS
+        // TOOL COLOR SCHEMES AND ICON CONFIGURATIONS
         const TOOL_CONFIG = {
-            'Power BI': { icon: 'fa-solid fa-chart-column', badgeBg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400', btnBg: 'bg-yellow-500' },
-            'Excel': { icon: 'fa-solid fa-file-excel', badgeBg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', btnBg: 'bg-emerald-600' },
-            'SQL': { icon: 'fa-solid fa-database', badgeBg: 'bg-sky-500/10', border: 'border-sky-500/30', text: 'text-sky-400', btnBg: 'bg-sky-600' },
-            'Tableau': { icon: 'fa-solid fa-chart-area', badgeBg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', btnBg: 'bg-orange-600' }
+            'Power BI': {
+                color: 'yellow',
+                badgeBg: 'bg-yellow-100 dark:bg-yellow-950/90',
+                text: 'text-yellow-700 dark:text-yellow-400',
+                border: 'border-yellow-300 dark:border-yellow-700/80',
+                icon: 'fa-solid fa-chart-column text-yellow-600 dark:text-yellow-400',
+                btnBg: 'bg-yellow-600 hover:bg-yellow-500'
+            },
+            'Excel': {
+                color: 'emerald',
+                badgeBg: 'bg-emerald-100 dark:bg-emerald-950/90',
+                text: 'text-emerald-700 dark:text-emerald-400',
+                border: 'border-emerald-300 dark:border-emerald-700/80',
+                icon: 'fa-solid fa-file-excel text-emerald-600 dark:text-emerald-400',
+                btnBg: 'bg-emerald-600 hover:bg-emerald-500'
+            },
+            'SQL': {
+                color: 'sky',
+                badgeBg: 'bg-sky-100 dark:bg-sky-950/90',
+                text: 'text-sky-700 dark:text-sky-400',
+                border: 'border-sky-300 dark:border-sky-700/80',
+                icon: 'fa-solid fa-database text-sky-600 dark:text-sky-400',
+                btnBg: 'bg-sky-600 hover:bg-sky-500'
+            },
+            'Tableau': {
+                color: 'orange',
+                badgeBg: 'bg-orange-100 dark:bg-orange-950/90',
+                text: 'text-orange-700 dark:text-orange-400',
+                border: 'border-orange-300 dark:border-orange-700/80',
+                icon: 'fa-solid fa-chart-area text-orange-600 dark:text-orange-400',
+                btnBg: 'bg-orange-600 hover:bg-orange-500'
+            }
         };
 
-        // 12 PRE-LOADED SAMPLE PROJECTS
+        // 12 DISTINCT SAMPLE PROJECTS WITH ENHANCED STRUCTURE
         const SAMPLE_PROJECTS = [
+            // --- POWER BI PROJECTS (3) ---
             {
                 id: 'pb-1',
-                title: 'Executive Sales & Profitability Dashboard',
+                title: 'Executive Sales & Profitability Control Tower',
                 tool: 'Power BI',
                 domain: 'Finance & Sales',
                 summary: 'Interactive enterprise sales dashboard with DAX time-intelligence metrics, regional profit variance, and target forecasting.',
-                impact: 'Identified low-margin product lines, boosting Q3 gross margin by 4.2% ($110k value).',
+                impact: 'Identified low-margin product lines, boosting Q3 gross margin by 4.2% ($110k profit increase).',
                 methods: ['DAX Time Intelligence', 'Power Query ETL', 'Star Schema Data Model', 'RLS Security'],
-                problem: 'Executive leadership lacked real-time visibility into region-level sales margins and target progress across 15 sub-regions.',
+                problem: `Executive leadership lacked real-time visibility into region-level sales margins across 15 sub-regions. Regional managers relied on static monthly Excel slide decks, causing 2-week reporting lags and hiding unmapped product discounts that drained gross profit margins.`,
+                learnings: [
+                    'Mastered DAX CALCULATE modifiers (ALL, ALLEXCEPT, SAMEPERIODLASTYEAR) to eliminate dynamic context transition errors.',
+                    'Engineered a Star Schema data model separating Fact tables from Date/Location Dimensions to boost visual matrix response times by 4x.',
+                    'Implemented Dynamic Row-Level Security (RLS) restricting regional directors to their assigned territory parameters.'
+                ],
                 dataPrep: 'Extracted raw SQL transactions, cleaned null currency values via Power Query, and constructed a 1-to-many Star Schema with DimDate.',
                 insights: '• Mid-Atlantic region exceeded target by 18%, while Southern branch suffered from heavy product discount leakage.\n• Sub-category B generated high revenue volume but zero net contribution after logistics overhead.',
                 code: `// Time Intelligence DAX Measure
@@ -586,17 +606,23 @@ RETURN
 DIVIDE(CurrentYTD - PriorYTD, PriorYTD, 0)`,
                 github: 'https://github.com',
                 demo: 'https://powerbi.microsoft.com',
-                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'pb-2',
-                title: 'Supply Chain & Logistics Control Tower',
+                title: 'Supply Chain & Logistics OTIF Monitor',
                 tool: 'Power BI',
                 domain: 'Supply Chain & Logistics',
                 summary: 'End-to-end logistics monitoring dashboard tracking OTIF (On-Time In-Full) delivery rates, carrier performance, and warehouse cycle times.',
                 impact: 'Reduced late shipment penalties by 22% and saved $68k in expedited carrier fees.',
                 methods: ['Decomposition Tree', 'Key Influencers Visual', 'DAX Measures', 'Field Parameters'],
-                problem: 'Logistics directors struggled to pin down exact root causes for order delays across 4 central distribution fulfillment hubs.',
+                problem: 'Logistics directors struggled to pin down exact root causes for order delays across 4 central distribution fulfillment hubs. Late shipments triggered severe SLA financial penalties from tier-1 retail partners.',
+                learnings: [
+                    'Utilized Power BI Key Influencers AI visual to automatically highlight hidden logistics bottlenecks.',
+                    'Built flexible Field Parameters allowing end-users to switch visual metrics dynamically between Volume, Delayed Days, and Penalty Costs.',
+                    'Optimized M-Code in Power Query to efficiently clean unformatted timestamps from 3rd party logistics carrier API feeds.'
+                ],
                 dataPrep: 'Combined ERP shipping logs with third-party carrier status API feeds inside Power Query, resolving timestamp format mismatches.',
                 insights: '• Hub-3 experienced a 3.4-hour packaging bottleneck specifically during Friday afternoon peak shifts.\n• Carrier X had an OTIF score of only 71% on cross-border routes.',
                 code: `// OTIF Calculation Measure
@@ -610,17 +636,23 @@ VAR OnTimeInFull = CALCULATE(
 RETURN DIVIDE(OnTimeInFull, TotalOrders, 0)`,
                 github: 'https://github.com',
                 demo: 'https://powerbi.microsoft.com',
-                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'pb-3',
-                title: 'Customer Churn & Retention Analytics Tracker',
+                title: 'Customer Churn & Retention Analytics Suite',
                 tool: 'Power BI',
                 domain: 'E-Commerce & Marketing',
                 summary: 'Predictive churn dashboard analyzing user engagement scoring, subscription renewal rates, and cohort survival curves.',
                 impact: 'Increased customer retention rate by 8.5%, protecting $185k in annual recurring revenue.',
                 methods: ['DAX Cohort Analysis', 'Dynamic Parameters', 'User Security Filters', 'Custom Tooltips'],
-                problem: 'Subscription team had high churn among month-3 subscribers without actionable indicators to target pre-churn intervention.',
+                problem: 'The marketing team lacked early warning indicators to identify users at risk of cancelling monthly subscriptions. By the time cancellation occurred, win-back campaigns proved largely ineffective.',
+                learnings: [
+                    'Built a dynamic customer cohort matrix calculating retention rates over 12 rolling subscription months.',
+                    'Designed custom hover tooltip pages showing detailed individual user engagement history without cluttering the primary dashboard.',
+                    'Structured calculated DAX metrics for Monthly Active User (MAU) churn rates.'
+                ],
                 dataPrep: 'Ingested raw event user telemetry and monthly billings into Power Query. Normalized subscription pause/cancellation states.',
                 insights: '• Users with fewer than 3 logins during month-2 exhibited an 82% likelihood of canceling in month-3.\n• Target discount prompts sent on day 45 reduced churn by over 30%.',
                 code: `// Monthly Active User (MAU) Churn Rate
@@ -630,17 +662,25 @@ VAR LostUsers = CALCULATE(DISTINCTCOUNT(Users[UserID]), Users[Status] = "Cancell
 RETURN DIVIDE(LostUsers, ActiveStart, 0)`,
                 github: 'https://github.com',
                 demo: 'https://powerbi.microsoft.com',
-                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
+
+            // --- EXCEL PROJECTS (3) ---
             {
                 id: 'ex-1',
-                title: 'Financial Modeling & 3-Statement Forecasting',
+                title: 'Dynamic Financial Modeling & Forecasting Model',
                 tool: 'Excel',
                 domain: 'Finance & Sales',
                 summary: 'Dynamic 3-statement financial model (IS, BS, CFS) with scenario analysis toggles (Base, Bear, Bull) and DCF valuation.',
                 impact: 'Streamlined quarterly board financial presentations and model scenario stress-testing.',
                 methods: ['INDEX/MATCH', 'XLOOKUP', 'VBA Macros', 'Data Tables', 'Dynamic Arrays'],
-                problem: 'Finance team relied on static spreadsheets with hardcoded formulas that broke during multi-scenario budgeting.',
+                problem: 'Finance team relied on static spreadsheets with hardcoded formulas that broke during multi-scenario budgeting. Sensitivity analysis required manual copy-pasting across dozens of worksheets.',
+                learnings: [
+                    'Constructed non-destructive dynamic array formulas (LET, LAMBDA, XLOOKUP) to handle financial statement logic without fragile hardcoding.',
+                    'Programmed VBA macros to automate multi-variable Data Tables for Monte Carlo sensitivity simulations.',
+                    'Developed rigorous circular reference safeguards in statement balance ties.'
+                ],
                 dataPrep: 'Structured trial balance inputs using dynamic array formulas (LET, LAMBDA) and automated refresh loops with VBA.',
                 insights: '• 5% reduction in COGS generates higher net margin impact than a 12% top-line revenue expansion.\n• Working capital buffer needed adjustment for Q4 inventory buildup.',
                 code: `' Excel VBA Macro for Automated Scenario Sensitivity Analysis
@@ -654,17 +694,23 @@ Sub RunScenarioSensitivities()
 End Sub`,
                 github: 'https://github.com',
                 demo: 'https://microsoft.com/excel',
-                image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'ex-2',
-                title: 'Automated Inventory Reorder & Safety Stock Matrix',
+                title: 'Automated Inventory & Safety Stock Planning Matrix',
                 tool: 'Excel',
                 domain: 'Supply Chain & Logistics',
                 summary: 'Automated inventory planning model calculating Economic Order Quantity (EOQ), reorder points, and automated stockout alerts.',
                 impact: 'Identified $45k in unnecessary inventory holding costs while eliminating stockouts for top SKUs.',
                 methods: ['Power Query', 'Conditional Formatting', 'XLOOKUP', 'LET & LAMBDA Functions'],
-                problem: 'Warehouse supervisors manually placed stock orders on gut feeling, resulting in overstock of slow-moving items.',
+                problem: 'Warehouse supervisors manually placed stock reorders based on intuition, causing severe overstock of slow-moving items and stockouts on core revenue drivers.',
+                learnings: [
+                    'Implemented advanced statistical functions (STDEV.S, SQRT) within Excel LET functions to compute dynamic safety stock thresholds.',
+                    'Automated CSV data refresh directly from ERP database files using embedded Excel Power Query queries.',
+                    'Built conditional formatting heatmaps triggering visual alerts when stock fell below reorder points.'
+                ],
                 dataPrep: 'Connected Power Query directly to warehouse database CSV exports, applying automated cleansing and SKU normalization.',
                 insights: '• Top 10% SKUs generated 70% of velocity but suffered stockouts twice per quarter.\n• Safety stock formula reduced overall warehouse holding footprint by 16%.',
                 code: `=LET(
@@ -676,17 +722,23 @@ End Sub`,
 )`,
                 github: 'https://github.com',
                 demo: 'https://microsoft.com/excel',
-                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'ex-3',
-                title: 'Sales KPI Cohort & Dynamic Pivot Analysis',
+                title: 'Retail Store KPI & Dynamic Pivot Matrix',
                 tool: 'Excel',
                 domain: 'Retail Analytics',
                 summary: 'Comprehensive retail sales model utilizing Slicers, Pivot Charts, Data Validation, and dynamic cohort retention matrices.',
                 impact: 'Pinpointed customer repeat purchase frequency, boosting repeat transaction revenue by 14%.',
                 methods: ['Pivot Tables & Charts', 'Slicers', 'SUMIFS/COUNTIFS', 'Data Validation'],
-                problem: 'Regional retail managers lacked a quick, no-code spreadsheet to evaluate monthly store level sales cohorts.',
+                problem: 'Regional retail managers lacked a quick spreadsheet tool to evaluate monthly store performance, basket sizes, and promotion redemption rates across 40 store locations.',
+                learnings: [
+                    'Designed multi-pivot dashboard layouts connected via shared timeline slicers.',
+                    'Utilized nested SUMIFS and COUNTIFS to construct custom KPIs without bloating workbook file size.',
+                    'Structured user input sheets with cell protection and strict Data Validation rules.'
+                ],
                 dataPrep: 'Cleaned 12 months of POS raw registers using Excel Power Query, standardizing date formats and eliminating return transactions.',
                 insights: '• Repeat purchase velocity peaks at week 3 post-initial acquisition.\n• Tier-1 cities show 2.3x higher multi-item basket size compared to suburban outlets.',
                 code: `=SUMIFS(
@@ -698,17 +750,25 @@ End Sub`,
 )`,
                 github: 'https://github.com',
                 demo: 'https://microsoft.com/excel',
-                image: 'https://images.unsplash.com/photo-1556742049-0a67d51421be?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1556742049-0a67d51421be?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
+
+            // --- SQL PROJECTS (3) ---
             {
                 id: 'sql-1',
-                title: 'E-Commerce Lifetime Value & RFM Segmentation',
+                title: 'E-Commerce Lifetime Value & RFM Segmentation Query Suite',
                 tool: 'SQL',
                 domain: 'E-Commerce & Marketing',
                 summary: 'Complex PostgreSQL query suite calculating Recency, Frequency, and Monetary (RFM) scores and customer lifetime value cohorts.',
                 impact: 'Provided data foundation for segmented marketing campaigns, increasing repeat order ROI by 24%.',
                 methods: ['Window Functions (NTILE, DENSE_RANK)', 'CTEs', 'Date Aggregations', 'CASE Statements'],
-                problem: 'Database contained 2M+ raw order records without structured customer tier labels for marketing automation.',
+                problem: 'The e-commerce database stored over 2 million raw order logs but lacked customer segmentation. All users received generic blast emails, resulting in low conversion rates and unsegmented ad spending.',
+                learnings: [
+                    'Mastered multi-stage Common Table Expressions (CTEs) to isolate transaction metrics before applying ranking functions.',
+                    'Utilized SQL NTILE window functions to automatically partition user frequency and spend into statistical quintiles.',
+                    'Optimized aggregation query speed by indexing customer IDs and order timestamps.'
+                ],
                 dataPrep: 'Structured multi-stage SQL CTEs to handle invoice deduplication, currency conversions, and aggregated customer totals.',
                 insights: '• Top "Champions" tier (RFM 555) comprised only 4.8% of user base but generated 41% of net gross revenue.\n• "At Risk" tier customers responded best to high-percentage product discount triggers.',
                 code: `WITH Customer_RFM AS (
@@ -732,17 +792,23 @@ SELECT customer_id, (r_score || f_score || m_score) AS rfm_segment
 FROM RFM_Scores;`,
                 github: 'https://github.com',
                 demo: 'https://postgresql.org',
-                image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'sql-2',
-                title: 'Healthcare Readmission Cohort & Risk Query Suite',
+                title: 'Healthcare 30-Day Readmission Risk Pipeline',
                 tool: 'SQL',
                 domain: 'Healthcare Analytics',
                 summary: 'Advanced SQL diagnostic pipeline identifying patient 30-day hospital readmission factors and risk stratification.',
                 impact: 'Reduced ETL query runtime by 60% via indexing and optimized SQL joins, surfacing high-risk readmissions early.',
                 methods: ['LAG/LEAD Functions', 'Self-Joins', 'Indexed Views', 'Partitioned CTEs'],
-                problem: 'Clinical database queries were unindexed and took over 45 minutes to compile 30-day patient re-hospitalization cohorts.',
+                problem: 'Hospital clinical databases ran unindexed queries that took over 45 minutes to compile patient 30-day readmission cohorts. Hospital administrators needed early flagging to avoid regulatory readmission penalties.',
+                learnings: [
+                    'Applied LAG and LEAD analytical window functions to compare sequential patient encounter timestamps without expensive self-joins.',
+                    'Built materialized views with clustered indexes to accelerate query response times from 45 minutes down to seconds.',
+                    'Handled complex medical record edge cases (e.g. transfers, partial discharges, concurrent diagnoses).'
+                ],
                 dataPrep: 'Created materialization strategies and partitioned indexes on encounter admission timestamps.',
                 insights: '• Patients admitted with >2 chronic conditions had a 3.2x higher 30-day readmission rate.\n• Follow-up contact within 48 hours post-discharge reduced readmission risk by 19%.',
                 code: `WITH PatientEncounters AS (
@@ -764,17 +830,23 @@ FROM PatientEncounters
 WHERE (next_admission_date - discharge_date) <= 30;`,
                 github: 'https://github.com',
                 demo: 'https://postgresql.org',
-                image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'sql-3',
-                title: 'Financial Fraud & Transaction Anomaly Detection',
+                title: 'Financial Fraud & Transaction Anomaly Script',
                 tool: 'SQL',
                 domain: 'Finance & Sales',
                 summary: 'Real-time financial anomaly identification scripts flagging rapid successive transactions and geographic leaps.',
                 impact: 'Prevented $120k in fraudulent debit card transaction chargebacks during pilot execution.',
                 methods: ['HAVING Filtering', 'Subqueries', 'Geographic Distance Functions', 'Window Frame Aggregations'],
-                problem: 'Legacy batch fraud scripts ran only once daily, allowing fraudulent transactions to settle before flagging.',
+                problem: 'Legacy fraud prevention batch scripts ran only once every 24 hours, allowing fraudulent transaction streaks to settle before fraud analysts received alerts.',
+                learnings: [
+                    'Structured sliding window frame aggregations (ROWS BETWEEN PRECEDING AND CURRENT ROW) to compute short-term customer spend velocity.',
+                    'Formulated subquery logic comparing immediate card transactions against 30-day baseline spend patterns.',
+                    'Engineered efficient SQL triggers for real-time alerting tables.'
+                ],
                 dataPrep: 'Constructed efficient streaming CTE pipelines analyzing rolling time windows (5-minute rolling sums).',
                 insights: '• 92% of fraudulent activities involved rapid sequential transactions under $5 threshold prior to large transfers.\n• Cross-country IP switches within 10 minutes flagged 99% accuracy in account takeover attempts.',
                 code: `SELECT 
@@ -792,17 +864,25 @@ WHERE amount > 5 * (
 );`,
                 github: 'https://github.com',
                 demo: 'https://postgresql.org',
-                image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
+
+            // --- TABLEAU PROJECTS (3) ---
             {
                 id: 'tb-1',
-                title: 'Global Supply Chain Risk Analysis & Map Dashboard',
+                title: 'Global Supply Chain Risk Analysis Map',
                 tool: 'Tableau',
                 domain: 'Supply Chain & Logistics',
                 summary: 'Interactive geospatial supply chain risk map with custom LOD expressions, port congestion metrics, and route risk layers.',
                 impact: 'Enabled logistics team to re-route 15% of shipments around congested maritime ports, avoiding severe port delays.',
                 methods: ['LOD Expressions (FIXED, INCLUDE)', 'Geospatial Mapping', 'Dual-Axis Charts', 'Parameters & Actions'],
-                problem: 'Global shipping coordinators lacked a unified geographical visual interface showing real-time port delays and weather alerts.',
+                problem: 'Global shipping coordinators lacked a unified geographical visual interface showing real-time port delays, severe weather alerts, and vessel congestion metrics.',
+                learnings: [
+                    'Implemented FIXED and INCLUDE Level of Detail (LOD) expressions to compute average regional port delay benchmarks independent of dashboard filter contexts.',
+                    'Engineered interactive Parameter Actions allowing users to select map points and dynamically update downstream detail breakdown charts.',
+                    'Blended disparate GIS geographic shapefiles with transactional shipping manifests in Tableau Prep Builder.'
+                ],
                 dataPrep: 'Blended global port congestion feeds with historical shipment manifests inside Tableau Prep Builder.',
                 insights: '• West Coast port transit delays increased lead times by 6.2 days compared to East Coast terminals.\n• Alternate rail routes provided a 12% cost advantage during peak holiday shipping season.',
                 code: `// Tableau Level of Detail (LOD) Expression for Port Delay Average
@@ -816,17 +896,23 @@ CASE [Metric Selector Parameter]
 END`,
                 github: 'https://github.com',
                 demo: 'https://public.tableau.com',
-                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'tb-2',
-                title: 'Retail Store Performance & Heatmap Dashboard',
+                title: 'Retail Store Footprint & Heatmap Dashboard',
                 tool: 'Tableau',
                 domain: 'Retail Analytics',
                 summary: 'Comprehensive retail store benchmarking dashboard using density heatmaps, spatial store footprints, and basket size metrics.',
                 impact: 'Supported store layout re-design that improved high-margin item impulse purchases by 11%.',
                 methods: ['Density Heatmaps', 'Table Calculations', 'Dashboard Action Filters', 'Custom Shapes'],
-                problem: 'Retail regional managers had difficulty comparing store performance metrics across diverse footprint sizes.',
+                problem: 'Retail regional managers had difficulty comparing store performance metrics across diverse footprint sizes and evaluating store interior foot traffic density.',
+                learnings: [
+                    'Built spatial density heatmaps mapping customer aisle traffic.',
+                    'Utilized Tableau Table Calculations (RANK, TOTAL, RUNNING_SUM) for dynamic in-visual store benchmarking.',
+                    'Created smooth UI navigation using Dashboard Action Filters.'
+                ],
                 dataPrep: 'Cleaned store POS transaction logs, created calculated ratios for Revenue per Square Foot.',
                 insights: '• Stores with end-cap promotions had 22% higher overall basket size.\n• Suburban locations had higher weekend foot traffic but lower overall basket margin compared to urban centers.',
                 code: `// Tableau Table Calculation for Percentage of Total Sales
@@ -836,17 +922,23 @@ SUM([Sales]) / TOTAL(SUM([Sales]))
 ([Total Revenue] - [Total COGS]) / [Total Revenue]`,
                 github: 'https://github.com',
                 demo: 'https://public.tableau.com',
-                image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             },
             {
                 id: 'tb-3',
-                title: 'HR Turnover & Employee Sentiment Analytics',
+                title: 'HR Turnover & Employee Attrition Story',
                 tool: 'Tableau',
                 domain: 'HR & People Analytics',
                 summary: 'People analytics dashboard highlighting attrition risk drivers, salary band equity, and employee sentiment score trends.',
                 impact: 'Helped HR team reduce voluntary engineering department turnover by 14% via targeted stay interviews.',
                 methods: ['Box Plots', 'Radar Charts', 'Tableau Story Points', 'Calculated Groups'],
-                problem: 'HR leadership lacked clear visualization on why mid-level software engineers were departing between months 18 and 24.',
+                problem: 'HR leadership lacked clear visualization on why mid-level software engineers were departing between months 18 and 24, leaving open positions that took months to fill.',
+                learnings: [
+                    'Leveraged Tableau Story Points to present a guided, step-by-step narrative for executive HR briefings.',
+                    'Utilized Box Plots to highlight salary band dispersion anomalies across engineering levels.',
+                    'Calculated employee tenure cohort retention groups.'
+                ],
                 dataPrep: 'Anonymized HR exit survey inputs and connected work anniversary tenure metrics inside Tableau Desktop.',
                 insights: '• Primary turnover driver for month 18-24 employees was perceived lack of career progression rather than compensation.\n• Hybrid working teams showed 25% higher satisfaction sentiment scores.',
                 code: `// Employee Turnover Rate Calculation
@@ -855,49 +947,101 @@ COUNTD(IF [Employment Status] = "Terminated" THEN [Employee ID] END)
 COUNTD([Employee ID])`,
                 github: 'https://github.com',
                 demo: 'https://public.tableau.com',
-                image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80'
+                image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80',
+                attachments: []
             }
         ];
 
-        // GLOBAL APP STATE
+        // STATE MANAGERS
         let projects = [];
         let profile = {};
         let activeToolTab = 'ALL';
         let currentViewMode = 'grid';
-        let currentTemplate = 'executive';
-        let isAdminMode = false;
+        let isAdminLoggedIn = false;
+        let activeCaseStudyId = null;
+        let targetCardCoverId = null;
+
+        // Temporary storage for files being added in form
+        let tempFormAttachments = [];
+        let tempFormImageBase64 = '';
 
         // INITIALIZATION
         window.onload = function() {
-            checkAdminMode();
+            checkAdminURLAccess();
             loadProfile();
             loadProjects();
-            loadTemplatePreference();
             renderAll();
         };
 
-        // 1. ADMIN MODE DETECTION (?admin=true)
-        function checkAdminMode() {
+        // SECRET URL PARAMETER ADMIN CHECK
+        function checkAdminURLAccess() {
             const urlParams = new URLSearchParams(window.location.search);
-            isAdminMode = urlParams.get('admin') === 'true';
+            const adminQuery = urlParams.get('admin');
 
-            const adminBanner = document.getElementById('adminBanner');
-            const adminOnlyElements = document.querySelectorAll('.admin-only');
-
-            if (isAdminMode) {
-                adminBanner.classList.remove('hidden');
-                adminOnlyElements.forEach(el => el.classList.remove('hidden'));
+            // Check if URL contains secret key
+            if (adminQuery === ADMIN_SECRET_KEY) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+                
+                // Clean the password out of the URL bar cleanly without reloading page
+                window.history.replaceState({}, document.title, window.location.pathname);
+                showToast('Admin Mode Unlocked via URL!');
             } else {
-                adminBanner.classList.add('hidden');
-                adminOnlyElements.forEach(el => el.classList.add('hidden'));
+                // Check existing session storage
+                const session = sessionStorage.getItem(ADMIN_SESSION_KEY);
+                isAdminLoggedIn = (session === 'true');
+            }
+
+            updateAdminUIState();
+        }
+
+        function lockAdminMode() {
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
+            isAdminLoggedIn = false;
+            updateAdminUIState();
+            renderAll();
+            showToast('Locked out of Admin mode', 'info');
+        }
+
+        function updateAdminUIState() {
+            const addBtn = document.getElementById('mainAddBtn');
+            const editProfBtn = document.getElementById('editProfileBtn');
+            const logoutBtn = document.getElementById('adminLogoutBtn');
+            const backupControls = document.getElementById('adminBackupControls');
+            const csCoverWrapper = document.getElementById('csCoverChangeWrapper');
+
+            if (isAdminLoggedIn) {
+                addBtn.classList.remove('hidden');
+                addBtn.classList.add('flex');
+                editProfBtn.classList.remove('hidden');
+                editProfBtn.classList.add('flex');
+                logoutBtn.classList.remove('hidden');
+                logoutBtn.classList.add('flex');
+                backupControls.classList.remove('hidden');
+                backupControls.classList.add('flex');
+                if(csCoverWrapper) csCoverWrapper.classList.remove('hidden');
+            } else {
+                addBtn.classList.add('hidden');
+                addBtn.classList.remove('flex');
+                editProfBtn.classList.add('hidden');
+                editProfBtn.classList.remove('flex');
+                logoutBtn.classList.add('hidden');
+                logoutBtn.classList.remove('flex');
+                backupControls.classList.add('hidden');
+                backupControls.classList.remove('flex');
+                if(csCoverWrapper) csCoverWrapper.classList.add('hidden');
             }
         }
 
-        // STORAGE MANAGEMENT
+        // STORAGE FUNCTIONS
         function loadProjects() {
             const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (saved) {
-                try { projects = JSON.parse(saved); } catch (e) { projects = [...SAMPLE_PROJECTS]; }
+                try {
+                    projects = JSON.parse(saved);
+                } catch (e) {
+                    projects = [...SAMPLE_PROJECTS];
+                }
             } else {
                 projects = [...SAMPLE_PROJECTS];
                 saveProjects();
@@ -911,7 +1055,11 @@ COUNTD([Employee ID])`,
         function loadProfile() {
             const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
             if (saved) {
-                try { profile = JSON.parse(saved); } catch (e) { profile = getSampleProfile(); }
+                try {
+                    profile = JSON.parse(saved);
+                } catch (e) {
+                    profile = getSampleProfile();
+                }
             } else {
                 profile = getSampleProfile();
                 saveProfileToStorage();
@@ -925,7 +1073,6 @@ COUNTD([Employee ID])`,
                 role: 'BI & Analytics Engineer | Power BI • Excel • SQL • Tableau',
                 bio: 'Specialized in transforming raw transactional databases into decision-ready executive dashboards, automated financial models, and actionable SQL cohort analyses.',
                 avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-                cover: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&auto=format&fit=crop&q=80',
                 github: 'https://github.com',
                 linkedin: 'https://linkedin.com',
                 email: 'alex.morgan@example.com'
@@ -940,77 +1087,24 @@ COUNTD([Employee ID])`,
             document.getElementById('profileName').textContent = profile.name || 'Analyst Name';
             document.getElementById('profileRole').textContent = profile.role || 'Data Analyst';
             document.getElementById('profileBio').textContent = profile.bio || '';
-            document.getElementById('profileAvatar').src = profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
-            
-            const profileSec = document.getElementById('profileSection');
-            if (profile.cover) {
-                profileSec.style.backgroundImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('${profile.cover}')`;
-            } else {
-                profileSec.style.backgroundImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1557683316-973673baf926?w=1200&auto=format&fit=crop&q=80')`;
-            }
-
+            document.getElementById('profileAvatar').src = profile.avatar || 'https://placehold.co/150';
             document.getElementById('profileGithub').href = profile.github || '#';
             document.getElementById('profileLinkedin').href = profile.linkedin || '#';
             document.getElementById('profileEmail').href = `mailto:${profile.email || ''}`;
         }
 
-        function loadTemplatePreference() {
-            const savedTemp = localStorage.getItem(TEMPLATE_STORAGE_KEY);
-            if (savedTemp) {
-                currentTemplate = savedTemp;
-                document.getElementById('templateSelect').value = savedTemp;
-            }
-        }
-
-        // TEMPLATE ENGINE
-        function changeTemplate(tempName) {
-            currentTemplate = tempName;
-            localStorage.setItem(TEMPLATE_STORAGE_KEY, tempName);
-            renderAll();
-            showToast(`Template changed to: ${tempName.toUpperCase()}`, 'info');
-        }
-
+        // RENDER LOGIC
         function renderAll() {
             updateToolCounts();
-            applyTemplateStyles();
             const filtered = getFilteredProjects();
             renderProjectCards(filtered);
         }
 
-        function applyTemplateStyles() {
-            const body = document.getElementById('appBody');
-            const mainContainer = document.getElementById('mainContainer');
-            const profileSec = document.getElementById('profileSection');
-            
-            // Reset base classes
-            body.className = "bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200 dark";
-            profileSec.className = "bg-slate-800/80 border border-slate-700/70 rounded-2xl p-6 shadow-xl relative overflow-hidden transition-all duration-300 bg-cover bg-center";
-
-            if (currentTemplate === 'terminal') {
-                body.className = "theme-terminal min-h-screen transition-colors duration-200 p-4";
-                profileSec.className = "bg-emerald-950/40 border border-emerald-600/80 rounded-xl p-6 shadow-xl font-mono bg-cover bg-center";
-            } else if (currentTemplate === 'glass') {
-                body.className = "bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-screen theme-glass";
-                profileSec.className = "glass-panel rounded-2xl p-6 shadow-2xl relative overflow-hidden bg-cover bg-center";
-            } else if (currentTemplate === 'splitscreen') {
-                mainContainer.className = "max-w-7xl mx-auto px-4 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start";
-            } else {
-                mainContainer.className = "max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6";
-            }
-
-            if (profile.cover) {
-                profileSec.style.backgroundImage = `linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('${profile.cover}')`;
-            }
-        }
-
         function updateToolCounts() {
             const counts = { 'Power BI': 0, 'Excel': 0, 'SQL': 0, 'Tableau': 0 };
-            projects.forEach(p => { if (counts[p.tool] !== undefined) counts[p.tool]++; });
-
-            document.getElementById('countPowerBI').textContent = counts['Power BI'];
-            document.getElementById('countExcel').textContent = counts['Excel'];
-            document.getElementById('countSQL').textContent = counts['SQL'];
-            document.getElementById('countTableau').textContent = counts['Tableau'];
+            projects.forEach(p => {
+                if (counts[p.tool] !== undefined) counts[p.tool]++;
+            });
 
             document.getElementById('badge-ALL').textContent = projects.length;
             document.getElementById('badge-PowerBI').textContent = counts['Power BI'];
@@ -1047,7 +1141,7 @@ COUNTD([Employee ID])`,
                 if (activeToolTab === matchName) {
                     btn.className = 'tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition bg-blue-600 text-white shadow';
                 } else {
-                    btn.className = 'tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-300 hover:text-white hover:bg-slate-700/50';
+                    btn.className = 'tool-tab flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700/50';
                 }
             });
             renderAll();
@@ -1060,7 +1154,7 @@ COUNTD([Employee ID])`,
             switchToolTab('ALL');
         }
 
-        // RENDER PROJECT CARDS ACCORDING TO SELECTED TEMPLATE
+        // RENDER CARDS
         function renderProjectCards(list) {
             const container = document.getElementById('projectsContainer');
             const emptyState = document.getElementById('emptyState');
@@ -1072,310 +1166,170 @@ COUNTD([Employee ID])`,
             }
             emptyState.classList.add('hidden');
 
-            if (currentTemplate === 'table') {
-                container.className = 'w-full overflow-x-auto';
-                container.innerHTML = generateSpreadsheetTableHTML(list);
-                return;
-            }
-
-            if (currentTemplate === 'timeline') {
-                container.className = 'relative border-l-2 border-blue-500/40 ml-4 pl-6 space-y-8';
-                container.innerHTML = list.map(p => generateTimelineCardHTML(p)).join('');
-                return;
-            }
-
-            if (currentTemplate === 'splitscreen') {
-                container.className = 'lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6';
-            } else if (currentViewMode === 'grid') {
-                container.className = currentTemplate === 'bento' 
-                    ? 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4' 
-                    : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+            if (currentViewMode === 'grid') {
+                container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
             } else {
                 container.className = 'flex flex-col gap-4';
             }
 
             container.innerHTML = list.map(p => {
-                if (currentTemplate === 'terminal') return generateTerminalCardHTML(p);
-                if (currentTemplate === 'glass') return generateGlassCardHTML(p);
-                if (currentTemplate === 'bento') return generateBentoCardHTML(p);
-                return generateStandardCardHTML(p);
-            }).join('');
-        }
+                const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
+                const methodBadges = (p.methods || []).map(m => 
+                    `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/80">${m}</span>`
+                ).join('');
 
-        // HTML TEMPLATE GENERATORS
-        function generateStandardCardHTML(p) {
-            const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
-            const methodBadges = (p.methods || []).map(m => `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-900/90 text-slate-300 border border-slate-700/80">${m}</span>`).join('');
-            const resCount = (p.resources || []).length;
+                const hasAttachments = p.attachments && p.attachments.length > 0;
 
-            return `
-            <div class="bg-slate-800/80 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-500 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col group relative">
-                <div class="relative h-44 overflow-hidden bg-slate-950">
-                    <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x300/1e293b/94a3b8?text=${encodeURIComponent(p.title)}'">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-                    <div class="absolute top-3 left-3 flex items-center gap-2">
-                        <span class="px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border} backdrop-blur flex items-center gap-1.5 shadow-md">
-                            <i class="${config.icon}"></i> ${p.tool}
-                        </span>
-                        ${resCount > 0 ? `<span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-600/90 text-white backdrop-blur flex items-center gap-1"><i class="fa-solid fa-paperclip"></i> ${resCount}</span>` : ''}
-                    </div>
-                    <div class="absolute top-3 right-3 flex items-center gap-1.5">
-                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 backdrop-blur">${p.domain}</span>
-                        ${isAdminMode ? `
-                        <button onclick="triggerDirectCoverChange('${p.id}')" class="p-1.5 bg-slate-900/90 hover:bg-blue-600 text-white rounded-lg text-xs border border-slate-700 transition" title="Direct Change Cover Image">
-                            <i class="fa-solid fa-camera"></i>
-                        </button>` : ''}
-                    </div>
-                </div>
-                <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-base font-extrabold text-white group-hover:text-blue-300 transition line-clamp-1">${p.title}</h3>
-                        <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">${p.summary}</p>
-                    </div>
-                    <div class="bg-slate-900/80 border border-slate-700/60 p-3 rounded-xl text-xs text-emerald-400 font-medium flex items-start gap-2">
-                        <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0"></i>
-                        <span class="line-clamp-2">${p.impact}</span>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5 pt-1">${methodBadges}</div>
-                    <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between gap-2">
-                        <button onclick="openCaseStudy('${p.id}')" class="flex-1 ${config.btnBg} hover:opacity-90 text-white px-3 py-2 rounded-xl text-xs font-bold transition text-center shadow">
-                            View Case Study
-                        </button>
-                        ${isAdminMode ? `
-                        <button onclick="editProject('${p.id}')" class="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs transition" title="Edit">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/20 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl text-xs transition" title="Delete">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>` : ''}
-                    </div>
-                </div>
-            </div>`;
-        }
+                if (currentViewMode === 'grid') {
+                    return `
+                    <div class="bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/70 hover:border-slate-400 dark:hover:border-slate-500 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col group relative">
+                        <!-- Top Image -->
+                        <div class="relative h-44 overflow-hidden bg-slate-950">
+                            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x300/1e293b/94a3b8?text=${encodeURIComponent(p.title)}'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                            
+                            <!-- Direct Change Cover Image Button on Card (Admin Only) -->
+                            ${isAdminLoggedIn ? `
+                            <div class="absolute top-3 right-3 opacity-90 hover:opacity-100 z-10">
+                                <button type="button" onclick="triggerCardCoverChange('${p.id}')" class="bg-slate-900/90 hover:bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg shadow-lg backdrop-blur flex items-center space-x-1.5 transition border border-slate-700/80">
+                                    <i class="fa-solid fa-camera text-xs text-blue-400"></i>
+                                    <span>Change Cover</span>
+                                </button>
+                            </div>
+                            ` : ''}
 
-        function generateTerminalCardHTML(p) {
-            const resCount = (p.resources || []).length;
-            return `
-            <div class="card-item p-4 rounded-xl font-mono text-xs space-y-2 border shadow-lg relative">
-                <div class="flex justify-between items-center text-emerald-400 border-b border-emerald-800/60 pb-2">
-                    <span class="font-bold">[${p.tool.toUpperCase()}] :: ${p.domain} ${resCount > 0 ? `[+${resCount} RES]` : ''}</span>
-                    <span class="text-[10px] text-emerald-600">ID: ${p.id}</span>
-                </div>
-                <h3 class="text-sm font-bold text-white">${p.title}</h3>
-                <p class="text-slate-300 leading-relaxed">$ ${p.summary}</p>
-                <div class="p-2 bg-black/50 rounded border border-emerald-900/50 text-emerald-300 font-mono">
-                    > IMPACT: ${p.impact}
-                </div>
-                <div class="pt-2 flex justify-between items-center flex-wrap gap-2">
-                    <button onclick="openCaseStudy('${p.id}')" class="bg-emerald-600 text-black px-3 py-1 font-bold rounded hover:bg-emerald-400 transition">
-                        ./inspect.sh
-                    </button>
-                    ${isAdminMode ? `
-                    <div class="flex items-center gap-2">
-                        <button onclick="triggerDirectCoverChange('${p.id}')" class="text-cyan-400 hover:underline">[cover]</button>
-                        <button onclick="editProject('${p.id}')" class="text-amber-400 hover:underline">[edit]</button>
-                        <button onclick="deleteProject('${p.id}')" class="text-rose-400 hover:underline">[rm]</button>
-                    </div>` : ''}
-                </div>
-            </div>`;
-        }
+                            <!-- Tool Badge Floating -->
+                            <div class="absolute top-3 left-3">
+                                <span class="px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border} backdrop-blur flex items-center gap-1.5 shadow-md">
+                                    <i class="${config.icon}"></i> ${p.tool}
+                                </span>
+                            </div>
 
-        function generateGlassCardHTML(p) {
-            const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
-            const resCount = (p.resources || []).length;
-            return `
-            <div class="glass-panel rounded-2xl p-5 space-y-4 hover:border-cyan-400/50 transition duration-300 shadow-2xl flex flex-col justify-between relative">
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${config.text} bg-white/5 border border-white/10 flex items-center gap-1.5">
-                            <i class="${config.icon}"></i> ${p.tool} ${resCount > 0 ? `• ${resCount} Files` : ''}
-                        </span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[10px] text-slate-400">${p.domain}</span>
-                            ${isAdminMode ? `
-                            <button onclick="triggerDirectCoverChange('${p.id}')" class="p-1 bg-white/10 hover:bg-cyan-500 text-white rounded-lg text-xs transition" title="Change Cover">
+                            <!-- Domain Badge -->
+                            <div class="absolute bottom-3 left-3 flex gap-1">
+                                ${hasAttachments ? '<span class="px-2 py-1 rounded-lg text-[10px] font-semibold bg-emerald-900/95 text-emerald-300 border border-emerald-700/80 backdrop-blur" title="Has Local Attachments"><i class="fa-solid fa-paperclip"></i></span>' : ''}
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-900/90 text-slate-300 border border-slate-700 backdrop-blur">${p.domain}</span>
+                            </div>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                            <div>
+                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-300 transition line-clamp-1">${p.title}</h3>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2 leading-relaxed">${p.summary}</p>
+                            </div>
+
+                            <!-- Value Impact Box -->
+                            <div class="bg-emerald-50 dark:bg-slate-900/80 border border-emerald-200 dark:border-slate-700/60 p-3 rounded-xl text-xs text-emerald-700 dark:text-emerald-400 font-medium flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-xs mt-0.5 shrink-0"></i>
+                                <span class="line-clamp-2">${p.impact}</span>
+                            </div>
+
+                            <!-- Methods Used -->
+                            <div class="flex flex-wrap gap-1.5 pt-1">
+                                ${methodBadges}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="pt-3 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-2">
+                                <button onclick="openCaseStudy('${p.id}')" class="flex-1 ${config.btnBg} hover:opacity-90 text-white px-3 py-2 rounded-xl text-xs font-bold transition text-center shadow">
+                                    View Case Study
+                                </button>
+                                ${isAdminLoggedIn ? `
+                                <button onclick="editProject('${p.id}')" class="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs transition" title="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/10 dark:bg-rose-500/20 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white rounded-xl text-xs transition" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/70 hover:border-slate-400 dark:hover:border-slate-500 rounded-2xl p-4 shadow-sm transition flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-4 w-full sm:w-auto">
+                            <img src="${p.image}" alt="${p.title}" class="w-16 h-16 rounded-xl object-cover hidden sm:block bg-slate-950" onerror="this.src='https://placehold.co/100/1e293b/94a3b8?text=Project'">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${config.badgeBg} ${config.text} border ${config.border}"><i class="${config.icon} mr-1"></i>${p.tool}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">${p.domain}</span>
+                                    ${hasAttachments ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800"><i class="fa-solid fa-paperclip mr-1"></i>File Attached</span>' : ''}
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-300 transition">${p.title}</h3>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 mt-0.5">${p.summary}</p>
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    ${methodBadges}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-200 dark:border-slate-700">
+                            <button onclick="openCaseStudy('${p.id}')" class="${config.btnBg} hover:opacity-90 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                                Details
+                            </button>
+                            ${isAdminLoggedIn ? `
+                            <button onclick="triggerCardCoverChange('${p.id}')" class="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 rounded-xl text-xs transition" title="Change Cover Image">
                                 <i class="fa-solid fa-camera"></i>
-                            </button>` : ''}
+                            </button>
+                            <button onclick="editProject('${p.id}')" class="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-xl text-xs transition">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/10 dark:bg-rose-500/20 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white rounded-xl text-xs transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            ` : ''}
                         </div>
-                    </div>
-                    <h3 class="text-base font-bold text-white mb-2">${p.title}</h3>
-                    <p class="text-xs text-slate-300 line-clamp-2">${p.summary}</p>
-                </div>
-                <div class="bg-white/5 border border-white/10 p-3 rounded-xl text-xs text-cyan-300">
-                    ✨ ${p.impact}
-                </div>
-                <div class="flex items-center justify-between pt-2 gap-2">
-                    <button onclick="openCaseStudy('${p.id}')" class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold py-2 rounded-xl hover:opacity-90 transition">
-                        Explore Case Study
-                    </button>
-                    ${isAdminMode ? `
-                    <button onclick="editProject('${p.id}')" class="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs transition"><i class="fa-solid fa-pen"></i></button>
-                    <button onclick="deleteProject('${p.id}')" class="p-2 bg-rose-500/20 hover:bg-rose-500 text-rose-300 text-xs rounded-xl transition"><i class="fa-solid fa-trash"></i></button>` : ''}
-                </div>
-            </div>`;
-        }
-
-        function generateBentoCardHTML(p) {
-            const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
-            const resCount = (p.resources || []).length;
-            return `
-            <div class="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between hover:border-slate-500 transition shadow-lg relative">
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center">
-                        <i class="${config.icon} ${config.text} text-lg"></i>
-                        <div class="flex items-center gap-1">
-                            ${resCount > 0 ? `<span class="text-[10px] bg-blue-600/30 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30"><i class="fa-solid fa-paperclip"></i> ${resCount}</span>` : ''}
-                            <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded text-slate-400">${p.domain}</span>
-                        </div>
-                    </div>
-                    <h4 class="text-sm font-bold text-white line-clamp-1">${p.title}</h4>
-                    <p class="text-[11px] text-slate-400 line-clamp-2">${p.summary}</p>
-                </div>
-                <div class="mt-3 pt-2 border-t border-slate-700/60 flex items-center justify-between">
-                    <button onclick="openCaseStudy('${p.id}')" class="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1">
-                        Inspect <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                    </button>
-                    ${isAdminMode ? `
-                    <div class="flex items-center gap-1">
-                        <button onclick="triggerDirectCoverChange('${p.id}')" class="p-1 text-slate-400 hover:text-blue-400 text-xs" title="Change Cover"><i class="fa-solid fa-camera"></i></button>
-                        <button onclick="editProject('${p.id}')" class="p-1 text-slate-400 hover:text-amber-400 text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProject('${p.id}')" class="p-1 text-slate-400 hover:text-rose-400 text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                    </div>` : ''}
-                </div>
-            </div>`;
-        }
-
-        function generateTimelineCardHTML(p) {
-            const config = TOOL_CONFIG[p.tool] || TOOL_CONFIG['Power BI'];
-            const resCount = (p.resources || []).length;
-            return `
-            <div class="relative bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
-                <div class="absolute -left-[31px] top-6 w-4 h-4 bg-blue-500 rounded-full border-4 border-slate-900"></div>
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <span class="px-2.5 py-0.5 rounded text-[10px] font-bold ${config.badgeBg} ${config.text} border ${config.border}">${p.tool}</span>
-                        <span class="text-xs text-slate-400 font-medium">• ${p.domain}</span>
-                        ${resCount > 0 ? `<span class="px-2 py-0.5 rounded text-[10px] bg-blue-600/20 text-blue-400 border border-blue-500/30"><i class="fa-solid fa-paperclip"></i> ${resCount} Files</span>` : ''}
-                    </div>
-                    ${isAdminMode ? `
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="triggerDirectCoverChange('${p.id}')" class="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs" title="Change Cover Image"><i class="fa-solid fa-camera"></i></button>
-                        <button onclick="editProject('${p.id}')" class="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProject('${p.id}')" class="p-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-lg text-xs" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                    </div>` : ''}
-                </div>
-                <h3 class="text-base font-bold text-white">${p.title}</h3>
-                <p class="text-xs text-slate-300 mt-1">${p.summary}</p>
-                <div class="mt-3 p-3 bg-slate-900/80 border border-slate-700/60 rounded-xl text-xs text-emerald-400">
-                    <strong>Key Outcome:</strong> ${p.impact}
-                </div>
-                <div class="mt-3 flex justify-end">
-                    <button onclick="openCaseStudy('${p.id}')" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white">
-                        Full Case Study
-                    </button>
-                </div>
-            </div>`;
-        }
-
-        function generateSpreadsheetTableHTML(list) {
-            const rows = list.map(p => {
-                const resCount = (p.resources || []).length;
-                return `
-            <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition text-xs">
-                <td class="p-3 font-bold text-white flex items-center gap-2">
-                    ${p.title}
-                    ${resCount > 0 ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-blue-600/30 text-blue-300"><i class="fa-solid fa-paperclip"></i> ${resCount}</span>` : ''}
-                </td>
-                <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">${p.tool}</span></td>
-                <td class="p-3 text-slate-400">${p.domain}</td>
-                <td class="p-3 text-emerald-400 font-medium">${p.impact}</td>
-                <td class="p-3 text-right">
-                    <div class="flex items-center justify-end gap-1.5">
-                        <button onclick="openCaseStudy('${p.id}')" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold">
-                            Open
-                        </button>
-                        ${isAdminMode ? `
-                        <button onclick="triggerDirectCoverChange('${p.id}')" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded" title="Cover Image"><i class="fa-solid fa-camera"></i></button>
-                        <button onclick="editProject('${p.id}')" class="p-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProject('${p.id}')" class="p-1 bg-rose-500/20 hover:bg-rose-500 text-rose-300 rounded" title="Delete"><i class="fa-solid fa-trash"></i></button>` : ''}
-                    </div>
-                </td>
-            </tr>`;
+                    </div>`;
+                }
             }).join('');
-
-            return `
-            <table class="w-full text-left border-collapse bg-slate-900 rounded-2xl overflow-hidden border border-slate-800">
-                <thead>
-                    <tr class="bg-slate-800/90 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700">
-                        <th class="p-3">Project Title</th>
-                        <th class="p-3">Tool</th>
-                        <th class="p-3">Domain</th>
-                        <th class="p-3">Business Value / Impact</th>
-                        <th class="p-3 text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>`;
         }
 
-        // DIRECT COVER IMAGE CHANGE HANDLER
-        function triggerDirectCoverChange(projectId) {
-            targetCoverProjectId = projectId;
-            document.getElementById('directCoverFileInput').click();
+        // DIRECT CARD COVER CHANGE LOGIC
+        function triggerCardCoverChange(projectId) {
+            if (!isAdminLoggedIn) return;
+            targetCardCoverId = projectId;
+            document.getElementById('directCardCoverInput').click();
         }
 
-        function handleDirectCoverUpload(e) {
-            const file = e.target.files[0];
-            if (!file || !targetCoverProjectId) return;
+        function handleDirectCardCoverUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !targetCardCoverId) return;
 
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const p = projects.find(item => item.id === targetCoverProjectId);
-                if (p) {
-                    p.image = event.target.result;
+            reader.onload = function(e) {
+                const project = projects.find(p => p.id === targetCardCoverId);
+                if (project) {
+                    project.image = e.target.result;
                     saveProjects();
                     renderAll();
-                    showToast('Cover image updated successfully!');
+                    showToast('Project cover image updated!');
                 }
+                targetCardCoverId = null;
+                event.target.value = '';
             };
             reader.readAsDataURL(file);
         }
 
-        // RESOURCE UPLOAD & CASE STUDY DISPLAY
-        function handleResourceUpload(e) {
-            const files = e.target.files;
-            if (!files || files.length === 0) return;
+        function changeCaseStudyCoverDirectly(event) {
+            if (!isAdminLoggedIn) return;
+            const file = event.target.files[0];
+            if (!file || !activeCaseStudyId) return;
 
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    tempFormResources.push({
-                        name: file.name,
-                        type: file.type || 'application/octet-stream',
-                        size: (file.size / 1024).toFixed(1) + ' KB',
-                        data: evt.target.result
-                    });
-                    renderFormResourcesList();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function renderFormResourcesList() {
-            const container = document.getElementById('formResourcesContainer');
-            container.innerHTML = tempFormResources.map((res, idx) => `
-                <div class="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
-                    <i class="fa-solid fa-file-lines text-blue-400"></i>
-                    <span class="truncate max-w-[150px]">${res.name}</span>
-                    <span class="text-[10px] text-slate-500">(${res.size})</span>
-                    <button type="button" onclick="removeTempResource(${idx})" class="text-rose-400 hover:text-white ml-1"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            `).join('');
-        }
-
-        function removeTempResource(idx) {
-            tempFormResources.splice(idx, 1);
-            renderFormResourcesList();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const project = projects.find(p => p.id === activeCaseStudyId);
+                if (project) {
+                    project.image = e.target.result;
+                    saveProjects();
+                    document.getElementById('csImage').src = e.target.result;
+                    renderAll();
+                    showToast('Case study cover image updated!');
+                }
+                event.target.value = '';
+            };
+            reader.readAsDataURL(file);
         }
 
         // CASE STUDY DISPLAY
@@ -1383,54 +1337,188 @@ COUNTD([Employee ID])`,
             const project = projects.find(p => p.id === id);
             if (!project) return;
 
+            activeCaseStudyId = id;
             const config = TOOL_CONFIG[project.tool] || TOOL_CONFIG['Power BI'];
 
+            document.getElementById('csImage').src = project.image;
             document.getElementById('csTitle').textContent = project.title;
             document.getElementById('csSummary').textContent = project.summary;
             document.getElementById('csDomain').textContent = project.domain;
             document.getElementById('csImpact').textContent = project.impact;
-            document.getElementById('csProblem').textContent = project.problem || 'Not specified.';
+            document.getElementById('csProblem').textContent = project.problem || 'No scenario overview provided.';
+            
+            // Format Learning Opportunities
+            const learningsContainer = document.getElementById('csLearnings');
+            if (project.learnings && Array.isArray(project.learnings) && project.learnings.length > 0) {
+                learningsContainer.innerHTML = project.learnings.map(item => 
+                    `<div class="flex items-start gap-2 bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <i class="fa-solid fa-check text-amber-500 dark:text-amber-400 text-xs mt-0.5"></i>
+                        <span>${item}</span>
+                    </div>`
+                ).join('');
+            } else {
+                learningsContainer.innerHTML = `<p class="text-slate-500 italic">No specific learning takeaways recorded.</p>`;
+            }
+
             document.getElementById('csDataPrep').textContent = project.dataPrep || 'Not specified.';
             document.getElementById('csInsights').textContent = project.insights || 'Not specified.';
-            document.getElementById('csCode').textContent = project.code || '-- No code snippet provided.';
-            document.getElementById('csImage').src = project.image;
+            document.getElementById('csCode').textContent = project.code || '-- No technical code snippet provided.';
+            
             document.getElementById('csGithubLink').href = project.github || '#';
             document.getElementById('csDemoLink').href = project.demo || '#';
 
-            const resourcesList = document.getElementById('csResourcesList');
-            if (project.resources && project.resources.length > 0) {
-                resourcesList.innerHTML = project.resources.map(res => `
-                    <div class="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-800 rounded-lg">
-                        <div class="flex items-center gap-2 truncate">
-                            <i class="fa-solid fa-file-arrow-down text-blue-400 shrink-0"></i>
-                            <span class="truncate text-slate-200 font-medium">${res.name}</span>
-                            <span class="text-[10px] text-slate-500 shrink-0">(${res.size})</span>
-                        </div>
-                        <a href="${res.data}" download="${res.name}" class="px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded text-[10px] font-bold transition flex items-center gap-1 shrink-0">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>
-                    </div>
-                `).join('');
-            } else {
-                resourcesList.innerHTML = `<p class="text-slate-500 italic text-xs col-span-2">No uploaded resource files attached yet. Edit project to upload datasets, slides, or dashboard files.</p>`;
-            }
-
+            // Tool Badge
             const badge = document.getElementById('csToolBadge');
             badge.className = `px-3 py-1 rounded-lg text-xs font-bold ${config.badgeBg} ${config.text} border ${config.border}`;
             badge.innerHTML = `<i class="${config.icon} mr-1"></i> ${project.tool}`;
 
-            const methodsContainer = document.getElementById('csMethods');
-            methodsContainer.innerHTML = (project.methods || []).map(m => 
-                `<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700">${m}</span>`
+            // Method Badges
+            document.getElementById('csMethods').innerHTML = (project.methods || []).map(m => 
+                `<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700">${m}</span>`
             ).join('');
+
+            // Screenshot Gallery
+            const gallery = document.getElementById('csImageGallery');
+            gallery.innerHTML = `
+                <div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 group cursor-pointer" onclick="zoomImage('${project.image}')">
+                    <img src="${project.image}" alt="Dashboard Preview" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/800x400/1e293b/94a3b8?text=Project+Preview'">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-semibold text-xs gap-2">
+                        <i class="fa-solid fa-magnifying-glass-plus text-base"></i> Zoom Screenshot
+                    </div>
+                </div>
+            `;
+
+            // Local Attachments Card Render
+            const attachmentsContainer = document.getElementById('csAttachmentsContainer');
+            if (project.attachments && project.attachments.length > 0) {
+                attachmentsContainer.innerHTML = project.attachments.map((att, idx) => `
+                    <div class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-xl flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2.5 bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                                <i class="fa-solid ${getFileIcon(att.name)} text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800 dark:text-slate-200">${att.name}</p>
+                                <p class="text-[10px] text-slate-500">${att.size || 'Local File Attachment'}</p>
+                            </div>
+                        </div>
+                        <a href="${att.data}" download="${att.name}" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-download"></i> Download File
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                attachmentsContainer.innerHTML = `
+                    <div class="text-[11px] text-slate-500 italic bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                        No local files or workbooks attached to this project.
+                    </div>
+                `;
+            }
 
             openModal('caseStudyModal');
         }
 
+        function zoomImage(src) {
+            document.getElementById('zoomedImage').src = src;
+            openModal('imageZoomModal');
+        }
+
+        function getFileIcon(filename = '') {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['pdf'].includes(ext)) return 'fa-file-pdf text-rose-400';
+            if (['xlsx', 'xls', 'csv'].includes(ext)) return 'fa-file-excel text-emerald-400';
+            if (['pbix'].includes(ext)) return 'fa-chart-column text-yellow-400';
+            if (['twbx', 'twb'].includes(ext)) return 'fa-chart-area text-orange-400';
+            return 'fa-file-lines text-slate-400';
+        }
+
+        // LOCAL FILE UPLOAD HANDLERS
+        function handleLocalImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempFormImageBase64 = e.target.result;
+                document.getElementById('formImageBase64').value = tempFormImageBase64;
+                showToast('Image uploaded & converted to Base64!');
+                updateFormAttachmentsPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleLocalAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('editProfileAvatar').value = e.target.result;
+                showToast('Avatar image loaded from local drive!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleLocalDocumentUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const formattedSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                tempFormAttachments.push({
+                    name: file.name,
+                    type: file.type,
+                    size: formattedSize,
+                    data: e.target.result
+                });
+                showToast(`Attached file: ${file.name}`);
+                updateFormAttachmentsPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateFormAttachmentsPreview() {
+            const container = document.getElementById('formUploadedFilesPreview');
+            const list = document.getElementById('formAttachmentsList');
+
+            if (tempFormAttachments.length === 0 && !tempFormImageBase64) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            let html = '';
+
+            if (tempFormImageBase64) {
+                html += `<span class="px-2 py-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800 text-[10px] flex items-center gap-1"><i class="fa-solid fa-image"></i> Custom Image Uploaded</span>`;
+            }
+
+            tempFormAttachments.forEach((att, idx) => {
+                html += `
+                    <span class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-900 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] flex items-center gap-1.5">
+                        <i class="fa-solid ${getFileIcon(att.name)}"></i> ${att.name}
+                        <button type="button" onclick="removeTempAttachment(${idx})" class="text-rose-600 dark:text-rose-400 hover:text-rose-500 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                    </span>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        function removeTempAttachment(index) {
+            tempFormAttachments.splice(index, 1);
+            updateFormAttachmentsPreview();
+        }
+
         // FORM MODAL HANDLERS
         function openProjectModal(editId = null) {
+            if (!isAdminLoggedIn) return;
             const form = document.getElementById('projectForm');
             form.reset();
+            tempFormAttachments = [];
+            tempFormImageBase64 = '';
+            updateFormAttachmentsPreview();
 
             if (editId) {
                 const p = projects.find(item => item.id === editId);
@@ -1444,20 +1532,28 @@ COUNTD([Employee ID])`,
                 document.getElementById('formMethods').value = (p.methods || []).join(', ');
                 document.getElementById('formSummary').value = p.summary;
                 document.getElementById('formProblem').value = p.problem || '';
+                
+                if (p.learnings && Array.isArray(p.learnings)) {
+                    document.getElementById('formLearnings').value = p.learnings.join('\n');
+                } else {
+                    document.getElementById('formLearnings').value = '';
+                }
+
                 document.getElementById('formDataPrep').value = p.dataPrep || '';
                 document.getElementById('formInsights').value = p.insights || '';
                 document.getElementById('formCode').value = p.code || '';
                 document.getElementById('formGithub').value = p.github || '';
                 document.getElementById('formDemo').value = p.demo || '';
-                document.getElementById('formImage').value = p.image || '';
-                tempFormResources = [...(p.resources || [])];
-                renderFormResourcesList();
+                
+                tempFormImageBase64 = p.image || '';
+                tempFormAttachments = p.attachments ? [...p.attachments] : [];
+                updateFormAttachmentsPreview();
             } else {
                 document.getElementById('formModalTitle').textContent = 'Add New Data Project';
                 document.getElementById('formProjectId').value = '';
-                tempFormResources = [];
-                renderFormResourcesList();
-                if (activeToolTab !== 'ALL') document.getElementById('formTool').value = activeToolTab;
+                if (activeToolTab !== 'ALL') {
+                    document.getElementById('formTool').value = activeToolTab;
+                }
             }
 
             openModal('projectFormModal');
@@ -1465,8 +1561,20 @@ COUNTD([Employee ID])`,
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            const methodsArray = document.getElementById('formMethods').value.split(',').map(m => m.trim()).filter(m => m.length > 0);
+            if (!isAdminLoggedIn) return;
+
+            const methodsArray = document.getElementById('formMethods').value
+                .split(',')
+                .map(m => m.trim())
+                .filter(m => m.length > 0);
+
+            const learningsArray = document.getElementById('formLearnings').value
+                .split('\n')
+                .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+                .filter(line => line.length > 0);
+
             const id = document.getElementById('formProjectId').value || 'proj-' + Date.now();
+            const finalImage = tempFormImageBase64 || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80';
 
             const projectData = {
                 id: id,
@@ -1477,13 +1585,14 @@ COUNTD([Employee ID])`,
                 methods: methodsArray,
                 summary: document.getElementById('formSummary').value,
                 problem: document.getElementById('formProblem').value,
+                learnings: learningsArray,
                 dataPrep: document.getElementById('formDataPrep').value,
                 insights: document.getElementById('formInsights').value,
                 code: document.getElementById('formCode').value,
                 github: document.getElementById('formGithub').value,
                 demo: document.getElementById('formDemo').value,
-                image: document.getElementById('formImage').value || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
-                resources: [...tempFormResources]
+                image: finalImage,
+                attachments: tempFormAttachments
             };
 
             const existingIndex = projects.findIndex(p => p.id === id);
@@ -1500,8 +1609,13 @@ COUNTD([Employee ID])`,
             closeModal('projectFormModal');
         }
 
-        function editProject(id) { openProjectModal(id); }
+        function editProject(id) { 
+            if (!isAdminLoggedIn) return;
+            openProjectModal(id); 
+        }
+
         function deleteProject(id) {
+            if (!isAdminLoggedIn) return;
             if (confirm('Are you sure you want to delete this project?')) {
                 projects = projects.filter(p => p.id !== id);
                 saveProjects();
@@ -1510,24 +1624,27 @@ COUNTD([Employee ID])`,
             }
         }
 
-        // PROFILE MODAL
+        // PROFILE EDIT
         function openProfileModal() {
+            if (!isAdminLoggedIn) return;
             document.getElementById('editProfileName').value = profile.name || '';
             document.getElementById('editProfileRole').value = profile.role || '';
             document.getElementById('editProfileBio').value = profile.bio || '';
             document.getElementById('editProfileAvatar').value = profile.avatar || '';
-            document.getElementById('editProfileCover').value = profile.cover || '';
             document.getElementById('editProfileGithub').value = profile.github || '';
             document.getElementById('editProfileLinkedin').value = profile.linkedin || '';
             openModal('profileModal');
         }
 
         function saveProfile() {
+            if (!isAdminLoggedIn) return;
             profile.name = document.getElementById('editProfileName').value;
             profile.role = document.getElementById('editProfileRole').value;
             profile.bio = document.getElementById('editProfileBio').value;
-            profile.avatar = document.getElementById('editProfileAvatar').value;
-            profile.cover = document.getElementById('editProfileCover').value;
+            const newAvatar = document.getElementById('editProfileAvatar').value;
+            if (newAvatar) {
+                profile.avatar = newAvatar;
+            }
             profile.github = document.getElementById('editProfileGithub').value;
             profile.linkedin = document.getElementById('editProfileLinkedin').value;
 
@@ -1537,27 +1654,39 @@ COUNTD([Employee ID])`,
             showToast('Profile saved!');
         }
 
-        // EXPORT STANDALONE DEPLOYABLE HTML
-        function exportStandaloneHTML() {
-            let htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `my_data_portfolio_${currentTemplate}.html`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Standalone HTML portfolio downloaded!');
-        }
-
-        // UTILITY HELPERS
+        // VIEW CONTROLS & THEME SWITCHING
         function setViewMode(mode) {
             currentViewMode = mode;
-            document.getElementById('gridViewBtn').className = mode === 'grid' ? 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition' : 'px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition';
-            document.getElementById('listViewBtn').className = mode === 'list' ? 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition' : 'px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-200 transition';
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+
+            if (mode === 'grid') {
+                gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition';
+                listBtn.className = 'px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition';
+            } else {
+                listBtn.className = 'px-3 py-1.5 rounded-lg text-xs bg-blue-600 text-white transition';
+                gridBtn.className = 'px-3 py-1.5 rounded-lg text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition';
+            }
             renderAll();
         }
 
+        function toggleTheme() {
+            const body = document.getElementById('appBody');
+            const themeIcon = document.getElementById('themeIcon');
+            body.classList.toggle('dark');
+            
+            if (body.classList.contains('dark')) {
+                body.className = 'bg-slate-900 text-slate-100 min-h-screen transition-colors duration-200 dark';
+                themeIcon.className = 'fa-solid fa-moon';
+                showToast('Switched to Dark Theme', 'info');
+            } else {
+                body.className = 'bg-slate-100 text-slate-800 min-h-screen transition-colors duration-200';
+                themeIcon.className = 'fa-solid fa-sun';
+                showToast('Switched to White Theme', 'info');
+            }
+        }
+
+        // UTILITY HELPERS
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
@@ -1565,8 +1694,10 @@ COUNTD([Employee ID])`,
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             const icon = type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-blue-400';
-            toast.className = 'bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs pointer-events-auto transform transition duration-300 translate-y-2';
+
+            toast.className = 'bg-slate-900 dark:bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs pointer-events-auto transform transition duration-300 translate-y-2';
             toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+
             container.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-2'), 10);
             setTimeout(() => {
@@ -1586,30 +1717,33 @@ COUNTD([Employee ID])`,
             showToast('Code snippet copied!');
         }
 
-        function toggleTheme() {
-            const body = document.getElementById('appBody');
-            body.classList.toggle('dark');
-        }
-
         function exportJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, projects, currentTemplate }, null, 2));
+            if (!isAdminLoggedIn) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ profile, projects }, null, 2));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `datacraft_backup_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchorElem.setAttribute("download", `datacraft_core_tools_backup_${new Date().toISOString().split('T')[0]}.json`);
             dlAnchorElem.click();
-            showToast('JSON Backup exported!');
+            showToast('Portfolio exported as JSON!');
         }
 
         function importJSON(event) {
+            if (!isAdminLoggedIn) return;
             const fileReader = new FileReader();
             fileReader.onload = function(e) {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if (parsed.projects) { projects = parsed.projects; saveProjects(); }
-                    if (parsed.profile) { profile = parsed.profile; saveProfileToStorage(); updateProfileUI(); }
-                    if (parsed.currentTemplate) { currentTemplate = parsed.currentTemplate; }
+                    if (parsed.projects && Array.isArray(parsed.projects)) {
+                        projects = parsed.projects;
+                        saveProjects();
+                    }
+                    if (parsed.profile) {
+                        profile = parsed.profile;
+                        saveProfileToStorage();
+                        updateProfileUI();
+                    }
                     renderAll();
-                    showToast('Portfolio restored!');
+                    showToast('Portfolio imported!');
                 } catch (err) {
                     showToast('Invalid JSON file', 'error');
                 }
@@ -1618,6 +1752,7 @@ COUNTD([Employee ID])`,
         }
 
         function resetToSampleData() {
+            if (!isAdminLoggedIn) return;
             if (confirm('Reset to 12 sample core projects? Custom entries will be replaced.')) {
                 projects = [...SAMPLE_PROJECTS];
                 profile = getSampleProfile();
